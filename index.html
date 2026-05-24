@@ -1484,7 +1484,7 @@
 
     <div class="where-row">
       <div class="where-label">Where</div>
-      <button class="where-btn active" data-where="gym">🏙️ City Gym</button>
+      <button class="where-btn active" data-where="gym">🏋️ Gym</button>
       <button class="where-btn" data-where="home">🏠 Home</button>
     </div>
 
@@ -2927,7 +2927,7 @@ function logSession() {
     id: Date.now(),
     date: sessionDate.toISOString(),
     category: WORKOUTS[activeWorkout]?.name || 'Workout',
-    location: state.where === 'gym' ? 'City Gym' : 'Home',
+    location: state.where === 'gym' ? 'Gym' : 'Home',
     energy: state.energy,
     totalSets,
     totalReps,
