@@ -57,6 +57,7 @@
     --rail-bicep: #b362ff;
     --rail-core: #3aa0ff;
     --rail-rest: #d4ff3a;
+    --rail-cooldown: #93c5fd;
     --rail-push: #ff4040;
     --rail-triceps: #ff8c3a;
     --rail-splits: #3affb3;
@@ -223,10 +224,31 @@
     letter-spacing: 0.08em;
     cursor: pointer;
     text-transform: uppercase;
-    transition: all 0.15s ease;
+    transition: all 0.18s ease-out;
+  }
+  .energy-btn:not(.active):hover {
+    border-color: var(--border-strong);
+    color: var(--text);
   }
   .energy-btn .emoji { display: block; font-size: 22px; margin-bottom: 4px; }
-  .energy-btn.active { border-color: var(--accent); color: var(--accent); background: rgba(212,255,58,0.06); }
+  .energy-btn[data-energy="average"].active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(212,255,58,0.06);
+    box-shadow: 0 0 14px rgba(212,255,58,0.10);
+  }
+  .energy-btn[data-energy="strong"].active {
+    border-color: var(--success);
+    color: var(--success);
+    background: rgba(58,255,179,0.06);
+    box-shadow: 0 0 14px rgba(58,255,179,0.10);
+  }
+  .energy-btn[data-energy="cooked"].active {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: rgba(255,68,68,0.06);
+    box-shadow: 0 0 14px rgba(255,68,68,0.10);
+  }
 
   /* Checklist */
   .checklist {
@@ -368,19 +390,6 @@
   /* Keep the rail above everything */
   .day-card::before { z-index: 3; }
 
-  /* Conditioning card — electric glow on the rail */
-  .day-card.conditioning:not(.disabled)::before {
-    box-shadow: 0 0 10px var(--rail-conditioning), 0 0 20px var(--rail-conditioning);
-    animation: electricGlow 2.4s ease-in-out infinite;
-  }
-  .day-card.conditioning:not(.disabled) .day-dot {
-    box-shadow: 0 0 8px var(--rail-conditioning);
-    animation: electricGlow 2.4s ease-in-out infinite;
-  }
-  @keyframes electricGlow {
-    0%, 100% { opacity: 0.85; }
-    50% { opacity: 1; }
-  }
 
   /* WORKOUT PAGE */
   .workout-header {
@@ -423,7 +432,7 @@
   }
   .workout-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 50px;
+    font-size: 76px;
     letter-spacing: 0.03em;
     color: var(--text);
     line-height: 1;
@@ -860,12 +869,45 @@
     text-align: center;
     box-shadow: 0 12px 48px rgba(0,0,0,0.7);
   }
+  .timer-ring-wrap {
+    position: relative;
+    width: 186px;
+    height: 186px;
+    margin: 0 auto 4px;
+  }
+  .timer-ring-svg {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+  .timer-ring-track {
+    fill: none;
+    stroke: var(--border);
+    stroke-width: 3;
+  }
+  .timer-ring-fill {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-dasharray: 339.3;
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 1.05s linear, stroke 0.3s ease;
+  }
+  .timer-popout.warning .timer-ring-fill { stroke: var(--rail-warm); }
+  .timer-popout.finished .timer-ring-fill { stroke: var(--success); }
   .timer-popout-count {
     font-family: 'Bebas Neue', sans-serif;
     font-size: 110px;
     line-height: 0.9;
     color: var(--accent);
     letter-spacing: 0.02em;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
   .timer-popout-label {
     font-family: 'JetBrains Mono', monospace;
@@ -899,13 +941,30 @@
   .timer-popout.finished { border-color: var(--success); }
   .timer-popout.finished .timer-popout-count { color: var(--success); }
   @keyframes popCount {
-    0% { transform: scale(1); }
-    35% { transform: scale(1.16); }
-    100% { transform: scale(1); }
+    0% { transform: translate(-50%, -50%) scale(1); }
+    35% { transform: translate(-50%, -50%) scale(1.16); }
+    100% { transform: translate(-50%, -50%) scale(1); }
   }
   .timer-popout-count.tick {
     animation: popCount 0.45s ease-out;
   }
+  @keyframes energyPop {
+    0%   { transform: scale(1); }
+    35%  { transform: scale(1.09); }
+    100% { transform: scale(1); }
+  }
+  .energy-btn.pop { animation: energyPop 0.35s ease-out; }
+  @keyframes rowFlash {
+    0%   { background: rgba(212,255,58,0.10); }
+    100% { background: transparent; }
+  }
+  .set-row.flash { animation: rowFlash 0.45s ease-out; }
+  @media (prefers-reduced-motion: no-preference) {
+    ::view-transition-old(root) { animation: 180ms ease-out both vt-out; }
+    ::view-transition-new(root) { animation: 180ms ease-out both vt-in; }
+  }
+  @keyframes vt-out { to { opacity: 0; transform: translateY(4px); } }
+  @keyframes vt-in  { from { opacity: 0; transform: translateY(-4px); } }
 
   /* Bottom tab nav */
   .tab-nav {
@@ -940,17 +999,18 @@
   }
   .tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
   .tab.active { color: var(--accent); }
-  .tab.active::before {
-    content: '';
+  .tab-indicator {
     position: absolute;
     top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 28px;
+    left: 0;
+    width: calc(100% / 3);
     height: 2px;
     background: var(--accent);
     border-radius: 0 0 3px 3px;
     box-shadow: 0 0 10px var(--accent), 0 0 22px rgba(212,255,58,0.35);
+    transform: translateX(calc(var(--tab-idx, 0) * 100%));
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
   }
 
   /* PROGRESS PAGE */
@@ -1101,19 +1161,6 @@
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
 
-  /* Custom core icon */
-  .core-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 22px;
-    height: 22px;
-    vertical-align: middle;
-    color: var(--text);
-    margin-right: 4px;
-  }
-  .core-icon svg { width: 100%; height: 100%; }
-  .checklist-item.done .core-icon { opacity: 0.4; }
 
   /* Last session reference */
   .last-session {
@@ -1727,7 +1774,7 @@
         </div>
         <div class="checklist-item" data-check="core">
           <div class="checkbox"></div>
-          <div class="checklist-label"><span class="core-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4 L18 4 L17 20 L7 20 Z"/><line x1="6.5" y1="9" x2="17.5" y2="9"/><line x1="6.8" y1="13.5" x2="17.2" y2="13.5"/><line x1="12" y1="5" x2="12" y2="19"/><path d="M12.2 9.2 L17.3 9.2 L17.1 13.3 L12.2 13.3 Z" fill="#d4ff3a" stroke="none" opacity="0.85"/></svg></span> Core</div>
+          <div class="checklist-label">🎯 Core</div>
         </div>
         <div class="checklist-item" data-check="stretch">
           <div class="checkbox"></div>
@@ -1892,7 +1939,13 @@
 <!-- Pop-out rest timer (large) — wrapper passes touches through so background still scrolls -->
 <div class="timer-popout-wrap" id="timerPopoutWrap">
   <div class="timer-popout" id="timerPopout">
-    <div class="timer-popout-count" id="timerPopoutCount">0:00</div>
+    <div class="timer-ring-wrap">
+      <svg class="timer-ring-svg" viewBox="0 0 120 120" aria-hidden="true">
+        <circle class="timer-ring-track" cx="60" cy="60" r="54"/>
+        <circle class="timer-ring-fill" id="timerRingFill" cx="60" cy="60" r="54"/>
+      </svg>
+      <div class="timer-popout-count" id="timerPopoutCount">0:00</div>
+    </div>
     <div class="timer-popout-label" id="timerPopoutLabel">Rest</div>
     <div class="timer-popout-actions">
       <button class="timer-popout-btn" id="timerPopoutPause" onclick="toggleTimer()">Pause</button>
@@ -1903,6 +1956,7 @@
 
 <!-- Tab nav -->
 <div class="tab-nav">
+  <div class="tab-indicator" id="tabIndicator"></div>
   <button class="tab active" data-tab="home">
     <svg viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v9a2 2 0 0 1-2 2h-4a2 2 0 0 1-2-2v-4h-2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9z"/></svg>
     Home
@@ -2565,8 +2619,8 @@ const COOLDOWN = [
   {
     id: 'cd_childpose',
     block: 'Cool Down',
-    blockRail: 'var(--accent)',
-    rail: 'var(--accent)',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
     name: "Child's Pose",
     alternates: [
       { name: "Child's Pose", cue: "Hips to heels. Arms reach forward. Breathe into the lower back.", sets: 1, reps: '60s', bwDefault: true, kind: 'hold' },
@@ -2576,8 +2630,8 @@ const COOLDOWN = [
   {
     id: 'cd_hipflex',
     block: 'Cool Down',
-    blockRail: 'var(--accent)',
-    rail: 'var(--accent)',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
     name: 'Hip Flexor Stretch',
     alternates: [
       { name: 'Kneeling Hip Flexor Stretch', cue: 'Lunge, back knee down. Tuck pelvis. Press hips forward. Tall torso.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' },
@@ -2587,8 +2641,8 @@ const COOLDOWN = [
   {
     id: 'cd_hamstring',
     block: 'Cool Down',
-    blockRail: 'var(--accent)',
-    rail: 'var(--accent)',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
     name: 'Hamstring Stretch',
     alternates: [
       { name: 'Standing Forward Fold', cue: 'Feet hip-width. Hinge at hips, soft knees. Let gravity lengthen.', sets: 1, reps: '60s', bwDefault: true, kind: 'hold' },
@@ -2598,8 +2652,8 @@ const COOLDOWN = [
   {
     id: 'cd_twist',
     block: 'Cool Down',
-    blockRail: 'var(--accent)',
-    rail: 'var(--accent)',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
     name: 'Supine Twist',
     alternates: [
       { name: 'Supine Twist', cue: 'On back. Knees to one side, arms wide. Both shoulders down. Switch sides.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' },
@@ -2609,8 +2663,8 @@ const COOLDOWN = [
   {
     id: 'cd_chest',
     block: 'Cool Down',
-    blockRail: 'var(--accent)',
-    rail: 'var(--accent)',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
     name: 'Chest Opener',
     alternates: [
       { name: 'Doorway Chest Stretch', cue: "Forearm on frame, step through. Open the chest. Don't shrug.", sets: 2, reps: '45s', bwDefault: true, kind: 'hold' },
@@ -2620,8 +2674,8 @@ const COOLDOWN = [
   {
     id: 'cd_breathing',
     block: 'Cool Down',
-    blockRail: 'var(--accent)',
-    rail: 'var(--accent)',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
     name: 'Box Breathing',
     alternates: [
       { name: 'Box Breathing', cue: 'In 4s · Hold 4s · Out 4s · Hold 4s. Activate the parasympathetic system. You earned this.', sets: 1, reps: '120s', bwDefault: true, kind: 'hold' },
@@ -2900,7 +2954,7 @@ function renderWorkout() {
   if (showCooldown) {
     const cdTitle = document.createElement('div');
     cdTitle.className = 'block-title';
-    cdTitle.style.color = 'var(--accent)';
+    cdTitle.style.color = 'var(--rail-cooldown)';
     cdTitle.textContent = 'Cool Down';
     container.appendChild(cdTitle);
 
@@ -3038,10 +3092,13 @@ function bindWorkoutEvents() {
       const { ex, set } = e.target.dataset;
       const nowDone = !state.exercises[ex].sets[set].done;
       state.exercises[ex].sets[set].done = nowDone;
-      // Ticking a set done also counts as session activity
       if (nowDone) autoStartSessionTimer();
       saveState();
       btn.classList.toggle('done');
+      if (nowDone) {
+        const row = btn.closest('.set-row');
+        if (row) { row.classList.remove('flash'); void row.offsetWidth; row.classList.add('flash'); }
+      }
     });
   });
 
@@ -3346,7 +3403,10 @@ function startTimer(seconds) {
   pop.classList.remove('warning', 'finished');
   document.getElementById('timerPause').textContent = 'Pause';
   document.getElementById('timerPopoutPause').textContent = 'Pause';
+  const ringFill = document.getElementById('timerRingFill');
+  if (ringFill) { ringFill.style.transition = 'none'; ringFill.style.strokeDashoffset = '0'; }
   updateTimerDisplay();
+  requestAnimationFrame(() => requestAnimationFrame(() => { if (ringFill) ringFill.style.transition = ''; }));
   if (timerState.interval) clearInterval(timerState.interval);
   timerState.interval = setInterval(tickTimer, 1000);
 }
@@ -3409,6 +3469,11 @@ function updateTimerDisplay() {
   }
   const labelEl = document.getElementById('timerPopoutLabel');
   if (labelEl) labelEl.textContent = 'Rest';
+  const ringFill = document.getElementById('timerRingFill');
+  if (ringFill && timerState.total > 0) {
+    const pct = timerState.remaining / timerState.total;
+    ringFill.style.strokeDashoffset = (339.3 * (1 - pct)).toFixed(1);
+  }
 }
 
 function toggleTimer() {
@@ -3436,6 +3501,9 @@ function bindHomeEvents() {
     btn.addEventListener('click', e => {
       state.energy = btn.dataset.energy;
       document.querySelectorAll('.energy-btn').forEach(b => b.classList.toggle('active', b.dataset.energy === state.energy));
+      btn.classList.remove('pop');
+      void btn.offsetWidth;
+      btn.classList.add('pop');
       saveState();
     });
   });
@@ -3488,23 +3556,32 @@ function renderHomeState() {
 
 // ===== TABS =====
 function switchTab(tab) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById(`page-${tab}`).classList.add('active');
-  document.getElementById('headerTitle').textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
-  if (tab === 'home') renderQuickStart();
-  if (tab === 'workout') {
-    renderWorkout();
-    bindDatePicker();
-    bindSessionNotesEvents();
-    bindWarmupEvents();
-    updateSessionTimer();
+  const tabIndex = ['home', 'workout', 'progress'].indexOf(tab);
+  const doSwitch = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById(`page-${tab}`).classList.add('active');
+    document.getElementById('headerTitle').textContent = tab.charAt(0).toUpperCase() + tab.slice(1);
+    document.querySelector('.tab-nav').style.setProperty('--tab-idx', tabIndex);
+    if (tab === 'home') renderQuickStart();
+    if (tab === 'workout') {
+      renderWorkout();
+      bindDatePicker();
+      bindSessionNotesEvents();
+      bindWarmupEvents();
+      updateSessionTimer();
+    }
+    if (tab === 'progress') {
+      renderProgress();
+      renderHeatmap();
+    }
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  };
+  if (document.startViewTransition) {
+    document.startViewTransition(doSwitch);
+  } else {
+    doSwitch();
   }
-  if (tab === 'progress') {
-    renderProgress();
-    renderHeatmap();
-  }
-  window.scrollTo({ top: 0, behavior: 'instant' });
 }
 
 function openWorkout(workoutKey) {
