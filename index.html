@@ -1520,6 +1520,166 @@
     padding-top: 10px;
     border-top: 1px solid var(--border);
   }
+  .session-notes-edit-lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-faint);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  .session-notes-edit .session-notes-input {
+    border-color: var(--border-strong);
+    cursor: text;
+  }
+
+  /* ===== GRADIENT MESH SYSTEM ===== */
+  /* Day card gradient fallbacks — show when photos don't load,
+     add atmospheric rail-colour depth when they do */
+  .day-card.pull {
+    background:
+      radial-gradient(ellipse at 15% 82%, rgba(255,210,58,0.18) 0%, transparent 56%),
+      radial-gradient(ellipse at 82% 12%, rgba(255,210,58,0.07) 0%, transparent 42%),
+      var(--bg-card);
+  }
+  .day-card.push {
+    background:
+      radial-gradient(ellipse at 15% 82%, rgba(255,64,64,0.18) 0%, transparent 56%),
+      radial-gradient(ellipse at 82% 12%, rgba(255,64,64,0.07) 0%, transparent 42%),
+      var(--bg-card);
+  }
+  .day-card.lower {
+    background:
+      radial-gradient(ellipse at 15% 82%, rgba(58,160,255,0.18) 0%, transparent 56%),
+      radial-gradient(ellipse at 82% 12%, rgba(58,160,255,0.07) 0%, transparent 42%),
+      var(--bg-card);
+  }
+  .day-card.splits {
+    background:
+      radial-gradient(ellipse at 15% 82%, rgba(58,255,179,0.18) 0%, transparent 56%),
+      radial-gradient(ellipse at 82% 12%, rgba(58,255,179,0.07) 0%, transparent 42%),
+      var(--bg-card);
+  }
+  .day-card.conditioning {
+    background:
+      radial-gradient(ellipse at 15% 82%, rgba(179,98,255,0.18) 0%, transparent 56%),
+      radial-gradient(ellipse at 82% 12%, rgba(179,98,255,0.07) 0%, transparent 42%),
+      var(--bg-card);
+  }
+  /* Colourised photo overlay — rail-colour tint bleeds into the top of each card */
+  .day-card.pull .day-card-bg::after {
+    background: linear-gradient(155deg, rgba(255,210,58,0.10) 0%, rgba(10,10,10,0.50) 45%, rgba(10,10,10,0.97) 100%);
+  }
+  .day-card.push .day-card-bg::after {
+    background: linear-gradient(155deg, rgba(255,64,64,0.10) 0%, rgba(10,10,10,0.50) 45%, rgba(10,10,10,0.97) 100%);
+  }
+  .day-card.lower .day-card-bg::after {
+    background: linear-gradient(155deg, rgba(58,160,255,0.10) 0%, rgba(10,10,10,0.50) 45%, rgba(10,10,10,0.97) 100%);
+  }
+  .day-card.splits .day-card-bg::after {
+    background: linear-gradient(155deg, rgba(58,255,179,0.10) 0%, rgba(10,10,10,0.50) 45%, rgba(10,10,10,0.97) 100%);
+  }
+  .day-card.conditioning .day-card-bg::after {
+    background: linear-gradient(155deg, rgba(179,98,255,0.10) 0%, rgba(10,10,10,0.50) 45%, rgba(10,10,10,0.97) 100%);
+  }
+  /* Progress page header — subtle accent glow */
+  .progress-header {
+    background: radial-gradient(ellipse at 50% 100%, rgba(212,255,58,0.05) 0%, transparent 65%);
+    border-radius: 14px;
+    margin: 0 -4px;
+    padding: 12px 8px 20px;
+  }
+
+  /* ===== TYPOGRAPHY HIERARCHY — LOGGING INTERFACE ===== */
+  /* Slightly larger inputs for better gym readability */
+  .set-input { font-size: 14px; }
+  /* De-emphasise the set counter — it's a row label, not content */
+  .set-num { font-size: 12px; color: var(--text-faint); }
+  /* Completed set rows: accent set number, dim the inputs */
+  .set-row:has(.set-check.done) .set-num {
+    color: var(--accent);
+    font-weight: 700;
+  }
+  .set-row:has(.set-check.done) .set-input {
+    opacity: 0.45;
+  }
+
+  /* ===== PB CELEBRATION OVERLAY ===== */
+  .pb-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(10,10,10,0.96);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 500;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .pb-overlay.visible { opacity: 1; pointer-events: auto; }
+  .pb-content { text-align: center; position: relative; padding: 20px; }
+  .pb-burst-svg {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -52%);
+    width: 340px; height: 340px;
+    opacity: 0;
+  }
+  .pb-overlay.visible .pb-burst-svg {
+    animation: burstSpin 2.6s ease-out forwards;
+  }
+  @keyframes burstSpin {
+    0%   { opacity: 0; transform: translate(-50%,-52%) scale(0.2) rotate(0deg); }
+    18%  { opacity: 0.55; transform: translate(-50%,-52%) scale(1) rotate(15deg); }
+    75%  { opacity: 0.35; transform: translate(-50%,-52%) scale(1.08) rotate(38deg); }
+    100% { opacity: 0; transform: translate(-50%,-52%) scale(1.25) rotate(55deg); }
+  }
+  .pb-trophy {
+    font-size: 68px;
+    position: relative;
+    z-index: 1;
+    line-height: 1;
+  }
+  .pb-overlay.visible .pb-trophy { animation: pbPop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.1s both; }
+  .pb-headline {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 86px;
+    color: #ffd23a;
+    line-height: 0.88;
+    letter-spacing: 0.04em;
+    text-shadow: 0 0 60px rgba(255,210,58,0.55);
+    position: relative;
+    z-index: 1;
+    margin-top: 8px;
+  }
+  .pb-overlay.visible .pb-headline { animation: pbPop 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.2s both; }
+  .pb-tagline {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-dim);
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-top: 14px;
+    position: relative;
+    z-index: 1;
+  }
+  .pb-overlay.visible .pb-tagline { animation: pbPop 0.45s ease 0.32s both; }
+  .pb-hint {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-faint);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin-top: 36px;
+    position: relative;
+    z-index: 1;
+  }
+  .pb-overlay.visible .pb-hint { animation: pbPop 0.45s ease 0.5s both; }
+  @keyframes pbPop {
+    from { transform: scale(0.5) translateY(16px); opacity: 0; }
+    to   { transform: scale(1) translateY(0); opacity: 1; }
+  }
 </style>
 </head>
 <body>
@@ -1602,17 +1762,17 @@
           <div class="day-name">Lower Body</div>
           <div class="day-sub">Glutes · Hamstrings · Core</div>
         </div>
-        <div class="day-card splits has-bg" onclick="openWorkout('splits')">
-          <div class="day-card-bg" style="background-image:url('images/splits-card.jpg')"></div>
-          <div class="day-dot"></div>
-          <div class="day-name">Splits + Flex</div>
-          <div class="day-sub">Toward Full Front Split</div>
-        </div>
-        <div class="day-card conditioning has-bg span-full" onclick="openWorkout('conditioning')">
+        <div class="day-card conditioning has-bg" onclick="openWorkout('conditioning')">
           <div class="day-card-bg" style="background-image:url('images/conditioning-card.jpg')"></div>
           <div class="day-dot"></div>
           <div class="day-name">Conditioning</div>
           <div class="day-sub">Sled · Rower · Mobility</div>
+        </div>
+        <div class="day-card splits has-bg span-full" onclick="openWorkout('splits')">
+          <div class="day-card-bg" style="background-image:url('images/splits-card.jpg'); background-position: center 55%;"></div>
+          <div class="day-dot"></div>
+          <div class="day-name">Splits + Flex</div>
+          <div class="day-sub">Toward Full Front Split</div>
         </div>
       </div>
     </div>
@@ -1755,6 +1915,17 @@
     <svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M14 7h7v7"/></svg>
     Progress
   </button>
+</div>
+
+<!-- PB Celebration Overlay -->
+<div class="pb-overlay" id="pbOverlay" onclick="dismissPBOverlay()">
+  <div class="pb-content">
+    <svg class="pb-burst-svg" id="pbBurstSvg" viewBox="0 0 200 200"></svg>
+    <div class="pb-trophy">🏆</div>
+    <div class="pb-headline">New PB</div>
+    <div class="pb-tagline">Personal Best</div>
+    <div class="pb-hint">Tap to dismiss</div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -2599,11 +2770,11 @@ function ensureExerciseState(exId) {
 // Pull and Home have no image yet (source files not supplied) — they fall back
 // to no banner, which simply hides the strip cleanly.
 const WORKOUT_BANNERS = {
-  'pull':         { img: 'images/pull-banner.jpg',         rail: 'var(--rail-pull)' },
-  'push':         { img: 'images/push-banner.jpg',         rail: 'var(--rail-push)' },
-  'lower':        { img: 'images/lower-banner.jpg',        rail: '#3aa0ff' },
-  'splits':       { img: 'images/splits-banner.jpg',       rail: 'var(--rail-splits)' },
-  'conditioning': { img: 'images/conditioning-banner.jpg', rail: 'var(--rail-conditioning)' }
+  'pull':         { img: 'images/pull-banner.jpg',         rail: 'var(--rail-pull)',         tint: 'rgba(255,210,58,0.13)' },
+  'push':         { img: 'images/push-banner.jpg',         rail: 'var(--rail-push)',         tint: 'rgba(255,64,64,0.13)' },
+  'lower':        { img: 'images/lower-banner.jpg',        rail: '#3aa0ff',                  tint: 'rgba(58,160,255,0.13)' },
+  'splits':       { img: 'images/splits-banner.jpg',       rail: 'var(--rail-splits)',       tint: 'rgba(58,255,179,0.13)' },
+  'conditioning': { img: 'images/conditioning-banner.jpg', rail: 'var(--rail-conditioning)', tint: 'rgba(179,98,255,0.13)' }
 };
 
 function updateWorkoutBanner() {
@@ -2612,14 +2783,18 @@ function updateWorkoutBanner() {
   const rail = document.getElementById('workoutBannerRail');
   if (!banner || !img) return;
   const cfg = WORKOUT_BANNERS[activeWorkout];
+  const fade = document.querySelector('.workout-banner-fade');
   if (cfg) {
     img.src = cfg.img;
     rail.style.background = cfg.rail;
     banner.classList.add('has-image');
+    if (fade && cfg.tint) {
+      fade.style.background = `linear-gradient(160deg, ${cfg.tint} 0%, rgba(10,10,10,0.48) 50%, rgba(10,10,10,0.92) 100%)`;
+    }
   } else {
-    // No image for this workout — hide the strip
     img.removeAttribute('src');
     banner.classList.remove('has-image');
+    if (fade) fade.style.background = '';
   }
 }
 
@@ -3413,8 +3588,11 @@ function logSession() {
   saveState();
 
   showToast(session.hasPB ? '🏆 New PB logged' : 'Session logged ✓');
-  if (session.hasPB) setTimeout(playPBChime, 150);
-  setTimeout(() => switchTab('progress'), 600);
+  if (session.hasPB) {
+    setTimeout(playPBChime, 150);
+    setTimeout(showPBCelebration, 300);
+  }
+  setTimeout(() => switchTab('progress'), session.hasPB ? 3600 : 600);
 }
 
 // ===== HELPERS FOR DISPLAY =====
@@ -3483,6 +3661,7 @@ function renderProgress() {
       detailHtml = `
         <div class="session-exercises">${exDetails}</div>
         <div class="session-notes-edit">
+          <div class="session-notes-edit-lbl">✎ Tap to edit notes</div>
           <div class="session-notes-row">
             <div class="session-notes-lbl">Felt</div>
             <input class="session-notes-input" value="${feltVal}"
@@ -3853,18 +4032,28 @@ function renderHeatmap() {
   if (!grid) return;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-  const trainedDays = new Set();
-  (state.history || []).forEach(s => {
+
+  // Map each workout category to its rail colour
+  const CATEGORY_COLOUR = {
+    'Pull + Core':   '#ffd23a',
+    'Push':          '#ff4040',
+    'Lower Body':    '#3aa0ff',
+    'Splits + Flex': '#3affb3',
+    'Conditioning':  '#b362ff',
+  };
+
+  // Build date → colour map; history is newest-first so reverse so newest wins
+  const trainedDays = new Map();
+  [...(state.history || [])].reverse().forEach(s => {
     const d = new Date(s.date);
     d.setHours(0, 0, 0, 0);
-    trainedDays.add(d.toDateString());
+    trainedDays.set(d.toDateString(), CATEGORY_COLOUR[s.category] || 'var(--accent)');
   });
 
   const dayLabels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
   let html = '<div class="heatmap-grid">';
   dayLabels.forEach(l => { html += `<div class="heatmap-day-label">${l}</div>`; });
 
-  // Align grid so today's column matches today's weekday (Mon=0..Sun=6)
   const todayDay = (today.getDay() + 6) % 7;
   const start = new Date(today);
   start.setDate(today.getDate() - (todayDay + 21));
@@ -3872,14 +4061,16 @@ function renderHeatmap() {
   for (let i = 0; i < 28; i++) {
     const d = new Date(start);
     d.setDate(start.getDate() + i);
-    const isFuture = d > today;
-    const isToday = d.toDateString() === today.toDateString();
-    const isTrained = trainedDays.has(d.toDateString());
+    const isFuture  = d > today;
+    const isToday   = d.toDateString() === today.toDateString();
+    const colour    = trainedDays.get(d.toDateString());
+    const isTrained = !!colour;
     let cls = 'heatmap-cell';
-    if (isFuture) cls += ' empty';
+    if (isFuture)  cls += ' empty';
     if (isTrained) cls += ' trained';
-    if (isToday) cls += ' today';
-    html += `<div class="${cls}" title="${d.toDateString()}">${isTrained ? '✓' : (isFuture ? '' : d.getDate())}</div>`;
+    if (isToday)   cls += ' today';
+    const style = isTrained ? ` style="background:${colour};border-color:${colour}"` : '';
+    html += `<div class="${cls}"${style} title="${d.toDateString()}">${isTrained ? '✓' : (isFuture ? '' : d.getDate())}</div>`;
   }
   html += '</div>';
   grid.innerHTML = html;
@@ -3985,6 +4176,38 @@ function showToast(msg) {
   toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+// ===== PB CELEBRATION =====
+function showPBCelebration() {
+  const overlay = document.getElementById('pbOverlay');
+  const svg = document.getElementById('pbBurstSvg');
+  if (!overlay || !svg) return;
+
+  // Draw starburst rays
+  const rays = 18;
+  let markup = '';
+  for (let i = 0; i < rays; i++) {
+    const angle = (i / rays) * Math.PI * 2;
+    const inner = 38 + (i % 3) * 4;
+    const outer = 88 + (i % 2) * 8;
+    const x1 = (100 + Math.cos(angle) * inner).toFixed(1);
+    const y1 = (100 + Math.sin(angle) * inner).toFixed(1);
+    const x2 = (100 + Math.cos(angle) * outer).toFixed(1);
+    const y2 = (100 + Math.sin(angle) * outer).toFixed(1);
+    const w   = i % 3 === 0 ? 2.8 : 1.4;
+    const op  = i % 3 === 0 ? 0.65 : 0.28;
+    markup += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ffd23a" stroke-width="${w}" stroke-linecap="round" opacity="${op}"/>`;
+  }
+  svg.innerHTML = markup;
+
+  overlay.classList.add('visible');
+  setTimeout(dismissPBOverlay, 3000);
+}
+
+function dismissPBOverlay() {
+  const overlay = document.getElementById('pbOverlay');
+  if (overlay) overlay.classList.remove('visible');
 }
 
 // ===== INIT =====
