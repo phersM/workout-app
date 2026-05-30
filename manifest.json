@@ -2,7 +2,7 @@
   "name": "Workout",
   "short_name": "Workout",
   "description": "Personal gym tracking — Pull, Push, Lower, Splits, Conditioning",
-  "start_url": "./index-2.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
