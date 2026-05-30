@@ -95,11 +95,11 @@
   /* HOME PAGE */
   .hero {
     position: relative;
-    padding: 20px 18px 22px;
-    border-radius: 14px;
+    padding: 20px 18px 26px;
+    border-radius: 18px;
     overflow: hidden;
     margin: 4px 0 4px;
-    min-height: 168px;
+    min-height: 210px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -137,42 +137,52 @@
   }
   .today-label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    color: var(--text-faint);
     text-transform: uppercase;
     text-shadow: 0 1px 6px rgba(0,0,0,0.95);
   }
   .today-date {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 56px;
-    line-height: 0.95;
+    font-size: 96px;
+    line-height: 0.82;
     color: var(--accent);
-    margin: 6px 0 12px;
-    letter-spacing: 0.02em;
-    text-shadow: 0 2px 12px rgba(0,0,0,0.9);
+    margin: 2px 0 8px;
+    letter-spacing: 0.01em;
+    text-shadow: 0 0 48px rgba(212,255,58,0.28), 0 2px 16px rgba(0,0,0,0.95);
   }
   .today-quote {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 13px;
-    color: var(--text);
+    font-size: 12px;
+    color: var(--text-dim);
     font-style: italic;
-    line-height: 1.5;
+    line-height: 1.55;
     text-shadow: 0 1px 8px rgba(0,0,0,0.95);
   }
 
   /* Energy check */
-  .section { margin-top: 24px; }
+  .section { margin-top: 28px; }
   .section-title {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 0.2em;
-    color: var(--text-dim);
+    font-size: 10px;
+    letter-spacing: 0.28em;
+    color: var(--text-faint);
     text-transform: uppercase;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
+  }
+  .section-title::before {
+    content: '';
+    display: inline-block;
+    width: 5px;
+    height: 5px;
+    background: var(--accent);
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 0 8px var(--accent);
   }
   .energy-grid {
     display: grid;
@@ -242,17 +252,17 @@
   .days-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 10px;
+    gap: 12px;
   }
   .day-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px 14px;
+    border-radius: 16px;
+    padding: 18px 16px;
     cursor: pointer;
     position: relative;
     overflow: hidden;
-    min-height: 152px;
+    min-height: 172px;
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
@@ -273,8 +283,8 @@
   }
   .day-name {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 0.04em;
+    font-size: 27px;
+    letter-spacing: 0.03em;
     color: var(--text);
     line-height: 1;
     text-shadow: 0 2px 8px rgba(0,0,0,0.95);
@@ -294,6 +304,7 @@
   .day-card.conditioning { --rail: var(--rail-conditioning); }
   .day-card.splits { --rail: var(--rail-splits); }
   .day-card.disabled { opacity: 0.4; cursor: not-allowed; }
+  .day-card.span-full { grid-column: 1 / -1; }
 
   /* Day-card background image. Sits behind the text.
      Two stacked layers keep text readable on any photo:
@@ -361,8 +372,8 @@
      Strong dark gradient keeps the title readable (text-first sample). */
   .workout-banner {
     position: relative;
-    height: 132px;
-    border-radius: 14px;
+    height: 156px;
+    border-radius: 16px;
     overflow: hidden;
     margin: 4px 0 4px;
     background: var(--bg-card);
@@ -393,17 +404,17 @@
   }
   .workout-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 42px;
-    letter-spacing: 0.04em;
+    font-size: 50px;
+    letter-spacing: 0.03em;
     color: var(--text);
     line-height: 1;
   }
   .workout-sub {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-    color: var(--text-dim);
+    font-size: 10px;
+    color: var(--text-faint);
     text-transform: uppercase;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.2em;
     margin-top: 8px;
   }
 
@@ -475,7 +486,7 @@
     content: '';
     position: absolute;
     left: 0; top: 0; bottom: 0;
-    width: 3px;
+    width: 4px;
     background: var(--ex-rail, var(--rail-pull));
   }
   .ex-header {
@@ -494,8 +505,8 @@
   }
   .ex-name {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 0.04em;
+    font-size: 24px;
+    letter-spacing: 0.03em;
     color: var(--text);
     line-height: 1.1;
   }
@@ -743,16 +754,17 @@
     color: #000;
     border: none;
     width: 100%;
-    padding: 20px;
+    padding: 22px 20px;
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 0.15em;
-    border-radius: 12px;
+    font-size: 24px;
+    letter-spacing: 0.18em;
+    border-radius: 14px;
     cursor: pointer;
     margin: 24px 0 16px;
-    transition: transform 0.1s ease;
+    transition: transform 0.1s ease, box-shadow 0.1s ease;
+    box-shadow: 0 0 36px rgba(212,255,58,0.18), 0 6px 16px rgba(0,0,0,0.35);
   }
-  .log-btn:active { transform: scale(0.98); }
+  .log-btn:active { transform: scale(0.98); box-shadow: 0 0 18px rgba(212,255,58,0.12); }
 
   /* Floating rest timer */
   .timer-bar {
@@ -905,9 +917,22 @@
     font-size: 9px;
     letter-spacing: 0.15em;
     text-transform: uppercase;
+    position: relative;
   }
   .tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
   .tab.active { color: var(--accent); }
+  .tab.active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 28px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 0 0 3px 3px;
+    box-shadow: 0 0 10px var(--accent), 0 0 22px rgba(212,255,58,0.35);
+  }
 
   /* PROGRESS PAGE */
   .progress-header {
@@ -915,27 +940,27 @@
   }
   .progress-title {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 42px;
-    letter-spacing: 0.04em;
+    font-size: 52px;
+    letter-spacing: 0.03em;
     color: var(--text);
     line-height: 1;
   }
   .progress-stats {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-    margin: 16px 0 24px;
+    gap: 10px;
+    margin: 18px 0 26px;
   }
   .stat-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
-    border-radius: 10px;
-    padding: 14px 10px;
+    border-radius: 12px;
+    padding: 16px 10px;
     text-align: center;
   }
   .stat-num {
     font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
+    font-size: 42px;
     color: var(--accent);
     line-height: 1;
   }
@@ -955,11 +980,11 @@
     margin-bottom: 10px;
     cursor: pointer;
   }
-  .session-card:active { background: var(--bg-elevated); }
+  .session-card-header:active { background: var(--bg-elevated); border-radius: 10px; }
   .session-top {
     display: flex;
     justify-content: space-between;
-    align-items: baseline;
+    align-items: flex-start;
     margin-bottom: 6px;
   }
   .session-date {
@@ -1251,15 +1276,16 @@
   .quick-start {
     background: var(--bg-card);
     border: 1px solid var(--border-strong);
-    border-left: 3px solid var(--accent);
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-left: 4px solid var(--accent);
+    border-radius: 14px;
+    padding: 16px 18px;
     margin-bottom: 16px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
+    box-shadow: inset 0 0 0 1px rgba(212,255,58,0.05), 0 2px 12px rgba(0,0,0,0.2);
   }
   .quick-start:active { background: var(--bg-elevated); }
   .quick-start-info { flex: 1; min-width: 0; }
@@ -1356,6 +1382,125 @@
     margin-left: 6px;
     vertical-align: middle;
   }
+
+  /* Warmup type selector */
+  .warmup-block {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+  }
+  .warmup-type-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .warmup-btns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    flex: 1;
+  }
+  .warmup-btn {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-dim);
+    padding: 7px 9px;
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .warmup-btn.active {
+    background: var(--bg-elevated);
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+  .warmup-dur-row {
+    display: none;
+    grid-template-columns: 80px 1fr;
+    align-items: center;
+    gap: 4px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Cooldown toggle button */
+  .cooldown-toggle-btn {
+    display: block;
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 14px 16px;
+    cursor: pointer;
+    text-align: center;
+    margin: 20px 0 4px;
+  }
+  .cooldown-toggle-btn:active { background: var(--bg-elevated); }
+  .cooldown-toggle-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* Session card expand/collapse */
+  .session-card-header {
+    cursor: pointer;
+    user-select: none;
+  }
+  .session-chevron {
+    font-size: 11px;
+    color: var(--text-faint);
+    margin-left: 6px;
+  }
+  .session-cat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    margin-top: 3px;
+  }
+  .session-top-right {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .session-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .session-action-btn {
+    flex: 1;
+    background: transparent;
+    border: 1px solid var(--border-strong);
+    color: var(--text-dim);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    padding: 9px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+  .session-action-btn.danger { border-color: var(--danger); color: var(--danger); }
+  .session-action-btn:active { background: var(--bg-elevated); }
+  .session-notes-edit {
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
 </style>
 </head>
 <body>
@@ -1378,7 +1523,7 @@
       <div class="hero-bg"></div>
       <div class="today-label">Today</div>
       <div class="today-date" id="todayDate">TUESDAY</div>
-      <div class="today-quote">"Shoes on. Water in hand. We're not negotiating today."</div>
+      <div class="today-quote" id="todayQuote"></div>
     </div>
 
     <div class="section">
@@ -1444,7 +1589,7 @@
           <div class="day-name">Splits + Flex</div>
           <div class="day-sub">Toward Full Front Split</div>
         </div>
-        <div class="day-card conditioning has-bg" onclick="openWorkout('conditioning')">
+        <div class="day-card conditioning has-bg span-full" onclick="openWorkout('conditioning')">
           <div class="day-card-bg" style="background-image:url('images/conditioning-card.jpg')"></div>
           <div class="day-dot"></div>
           <div class="day-name">Conditioning</div>
@@ -1482,9 +1627,27 @@
       <input type="date" id="workoutDateInput">
     </div>
 
+    <div class="warmup-block" id="warmupBlock">
+      <div class="warmup-type-row">
+        <div class="where-label">Warmup</div>
+        <div class="warmup-btns">
+          <button class="warmup-btn active" data-warmup="none">None</button>
+          <button class="warmup-btn" data-warmup="bike">🚲 Bike</button>
+          <button class="warmup-btn" data-warmup="rower">🚣 Rower</button>
+          <button class="warmup-btn" data-warmup="skier">⛷️ Skier</button>
+          <button class="warmup-btn" data-warmup="skipping">🪢 Skip</button>
+          <button class="warmup-btn" data-warmup="treadmill">🏃 Treadmill</button>
+        </div>
+      </div>
+      <div class="warmup-dur-row" id="warmupDurRow">
+        <div class="where-label">Duration</div>
+        <input class="set-input" type="text" inputmode="numeric" placeholder="mins" id="warmupDuration">
+      </div>
+    </div>
+
     <div class="where-row">
       <div class="where-label">Where</div>
-      <button class="where-btn active" data-where="gym">🏋️ Gym</button>
+      <button class="where-btn active" data-where="gym">🏙️ City Gym</button>
       <button class="where-btn" data-where="home">🏠 Home</button>
     </div>
 
@@ -2208,13 +2371,83 @@ const CONDITIONING = [
   }
 ];
 
+const COOLDOWN = [
+  {
+    id: 'cd_childpose',
+    block: 'Cool Down',
+    blockRail: 'var(--accent)',
+    rail: 'var(--accent)',
+    name: "Child's Pose",
+    alternates: [
+      { name: "Child's Pose", cue: "Hips to heels. Arms reach forward. Breathe into the lower back.", sets: 1, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: "Wide Child's Pose", cue: "Knees wide. Same arms-forward reach. Opens the hips more.", sets: 1, reps: '60s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_hipflex',
+    block: 'Cool Down',
+    blockRail: 'var(--accent)',
+    rail: 'var(--accent)',
+    name: 'Hip Flexor Stretch',
+    alternates: [
+      { name: 'Kneeling Hip Flexor Stretch', cue: 'Lunge, back knee down. Tuck pelvis. Press hips forward. Tall torso.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: 'Low Lunge', cue: 'Back knee on floor. Sink hips low. Arms overhead if comfortable.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_hamstring',
+    block: 'Cool Down',
+    blockRail: 'var(--accent)',
+    rail: 'var(--accent)',
+    name: 'Hamstring Stretch',
+    alternates: [
+      { name: 'Standing Forward Fold', cue: 'Feet hip-width. Hinge at hips, soft knees. Let gravity lengthen.', sets: 1, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: 'Seated Hamstring Stretch', cue: 'Legs straight. Reach toward feet. Hinge from hips, not waist.', sets: 1, reps: '60s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_twist',
+    block: 'Cool Down',
+    blockRail: 'var(--accent)',
+    rail: 'var(--accent)',
+    name: 'Supine Twist',
+    alternates: [
+      { name: 'Supine Twist', cue: 'On back. Knees to one side, arms wide. Both shoulders down. Switch sides.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: 'Seated Twist', cue: 'Cross-legged. Hand to opposite knee. Twist from the base of the spine.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_chest',
+    block: 'Cool Down',
+    blockRail: 'var(--accent)',
+    rail: 'var(--accent)',
+    name: 'Chest Opener',
+    alternates: [
+      { name: 'Doorway Chest Stretch', cue: "Forearm on frame, step through. Open the chest. Don't shrug.", sets: 2, reps: '45s', bwDefault: true, kind: 'hold' },
+      { name: 'Cross-body Shoulder Stretch', cue: 'Arm across body, gentle pull. Joint health, not force.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_breathing',
+    block: 'Cool Down',
+    blockRail: 'var(--accent)',
+    rail: 'var(--accent)',
+    name: 'Box Breathing',
+    alternates: [
+      { name: 'Box Breathing', cue: 'In 4s · Hold 4s · Out 4s · Hold 4s. Activate the parasympathetic system. You earned this.', sets: 1, reps: '120s', bwDefault: true, kind: 'hold' },
+      { name: 'Savasana', cue: 'Lie flat. Arms wide, palms up. Eyes closed. Total surrender. You earned it.', sets: 1, reps: '120s', bwDefault: true, kind: 'hold' }
+    ]
+  }
+];
+
 // Workouts lookup — used by switchTab and openWorkout
 const WORKOUTS = {
   'pull': { name: 'Pull + Core', sub: 'Back · Biceps · Posture', exercises: PULL_CORE },
   'push': { name: 'Push', sub: 'Chest · Shoulders · Triceps', exercises: PUSH },
   'lower': { name: 'Lower Body', sub: 'Glutes · Hamstrings · Core', exercises: LOWER_BODY },
   'splits': { name: 'Splits + Flex', sub: 'Toward Full Front Split', exercises: SPLITS },
-  'conditioning': { name: 'Conditioning', sub: 'Sled · Rower · Mobility', exercises: CONDITIONING }
+  'conditioning': { name: 'Conditioning', sub: 'Sled · Rower · Mobility', exercises: CONDITIONING },
+  'cooldown': { name: 'Cool Down', sub: 'Stretch · Breathe · Recover', exercises: COOLDOWN }
 };
 
 // Currently active workout (defaults to pull for backward compatibility)
@@ -2225,10 +2458,12 @@ let state = {
   energy: null,
   checklist: { warmup: false, main: false, core: false, stretch: false, notes: false },
   where: 'gym',
+  warmupType: 'none',
+  warmupDuration: '',
   workoutDate: null,
   sessionNotes: { felt: '', nextTime: '' },
   activeWorkout: 'pull',
-  exercises: {}, // keyed by exercise id
+  exercises: {},
   history: []
 };
 
@@ -2243,6 +2478,10 @@ let timerState = {
 
 // Hold timer state — keyed by `${exId}_${setIdx}` so multiple hold timers can run independently
 let holdTimers = {};
+
+// UI state (not persisted)
+let showCooldown = false;
+let expandedSessions = new Set();
 
 const STORAGE_KEY = 'workout_app_pull_core_v1';
 
@@ -2457,9 +2696,79 @@ function renderWorkout() {
     container.appendChild(card);
   });
 
+  // ===== COOL DOWN / STRETCH =====
+  const cdBtn = document.createElement('button');
+  cdBtn.className = 'cooldown-toggle-btn' + (showCooldown ? ' active' : '');
+  cdBtn.textContent = showCooldown ? '▲ Hide Cool Down / Stretch' : '▽ Cool Down / Stretch';
+  cdBtn.onclick = toggleCooldown;
+  container.appendChild(cdBtn);
+
+  if (showCooldown) {
+    const cdTitle = document.createElement('div');
+    cdTitle.className = 'block-title';
+    cdTitle.style.color = 'var(--accent)';
+    cdTitle.textContent = 'Cool Down';
+    container.appendChild(cdTitle);
+
+    COOLDOWN.forEach(ex => {
+      const exState = ensureExerciseState(ex.id);
+      const variant = ex.alternates[exState.altIdx];
+      const lastSession = getLastSessionForExercise(variant.name);
+      const pb = getPBForExercise(variant.name);
+      const cdCard = document.createElement('div');
+      cdCard.className = 'ex-card';
+      cdCard.style.setProperty('--ex-rail', ex.rail);
+      cdCard.innerHTML = `
+        <div class="ex-header">
+          <div class="ex-info">
+            <div class="ex-name-row">
+              <div class="ex-name">${variant.name}</div>
+              ${ex.alternates.length > 1 ? `<button class="swap-btn" data-swap="${ex.id}">⇄ Swap</button>` : ''}
+            </div>
+            <div class="ex-cue">${variant.cue}</div>
+            ${lastSession ? `
+              <div class="last-session">
+                <span class="last-session-lbl">Last:</span>
+                <span class="last-session-val">${lastSession}</span>
+                ${pb ? `<span class="pb-badge">🏆 PB ${pb}</span>` : ''}
+              </div>
+            ` : ''}
+          </div>
+          <div class="ex-target">
+            <div class="ex-target-num">${variant.sets}×${variant.reps}</div>
+            <div class="ex-target-lbl">Sets × Hold</div>
+          </div>
+        </div>
+        <div class="sets-table">
+          <div class="sets-headers">
+            <div>#</div><div style="grid-column:2/4">Hold</div><div>✓</div>
+          </div>
+          ${exState.sets.map((s, i) => `
+            <div class="set-row">
+              <div class="set-num">${i + 1}</div>
+              <div class="tr-wrapper" style="grid-column:2/4">
+                <button class="hold-btn ${s.reps ? 'done' : 'idle'}" data-ex="${ex.id}" data-set="${i}" data-hold-btn>
+                  ${s.reps ? `${s.reps}s` : 'Tap to start'}
+                </button>
+              </div>
+              <button class="set-check ${s.done ? 'done' : ''}" data-ex="${ex.id}" data-set="${i}" data-field="done"></button>
+            </div>
+          `).join('')}
+          <textarea class="ex-notes" placeholder="Notes for this exercise…" data-ex="${ex.id}" data-field="notes">${exState.notes}</textarea>
+        </div>
+      `;
+      container.appendChild(cdCard);
+    });
+  }
+
   bindWorkoutEvents();
   // Restore visual state of any running hold timers after re-render
   restoreRunningHoldTimers();
+}
+
+function toggleCooldown() {
+  showCooldown = !showCooldown;
+  renderWorkout();
 }
 
 function bindWorkoutEvents() {
@@ -2675,45 +2984,158 @@ function getAudioCtx() {
       audioCtx = null;
     }
   }
-  // If the context got suspended (common on iOS), resume it
-  if (audioCtx && audioCtx.state === 'suspended') {
-    audioCtx.resume();
-  }
   return audioCtx;
 }
 
 // Play a short tone. freq in Hz, duration in seconds.
+// Awaits resume() before scheduling so iOS doesn't silently drop notes on a
+// suspended context — the root cause of audio stopping after the first couple timers.
 function playTone(freq, duration, type) {
   const ctx = getAudioCtx();
   if (!ctx) return;
-  try {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = type || 'sine';
-    osc.frequency.value = freq;
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    const now = ctx.currentTime;
-    // Quick attack, smooth decay — avoids clicks
-    gain.gain.setValueAtTime(0.0001, now);
-    gain.gain.exponentialRampToValueAtTime(0.4, now + 0.02);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
-    osc.start(now);
-    osc.stop(now + duration + 0.02);
-  } catch (e) {
-    // Audio failure is non-fatal — timer still works visually
+  const doPlay = () => {
+    try {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = type || 'sine';
+      osc.frequency.value = freq;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      const now = ctx.currentTime;
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(0.4, now + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+      osc.start(now);
+      osc.stop(now + duration + 0.02);
+    } catch (e) {}
+  };
+  if (ctx.state !== 'running') {
+    ctx.resume().then(doPlay).catch(() => {});
+  } else {
+    doPlay();
   }
 }
 
-// A countdown beep (one per second at 3, 2, 1)
+// Countdown beep — ascending scale tones (C5 → E5 → G5 at 3 → 2 → 1).
+// Reads timerState.remaining so each second plays a different pitch,
+// building harmonic tension that the finish chime then resolves.
 function playCountdownBeep() {
-  playTone(660, 0.15, 'square');
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const pitchMap = { 3: 523.25, 2: 659.25, 1: 783.99 };
+  const freq = pitchMap[timerState.remaining] || 523.25;
+  const doPlay = () => {
+    const now = ctx.currentTime;
+    // Main square wave — bright, clean, game-like
+    const osc1 = ctx.createOscillator(), g1 = ctx.createGain();
+    osc1.type = 'square';
+    osc1.frequency.value = freq;
+    g1.gain.setValueAtTime(0.001, now);
+    g1.gain.exponentialRampToValueAtTime(0.18, now + 0.008);
+    g1.gain.exponentialRampToValueAtTime(0.001, now + 0.22);
+    osc1.connect(g1); g1.connect(ctx.destination);
+    osc1.start(now); osc1.stop(now + 0.28);
+    // Soft octave shimmer — adds sparkle without harshness
+    const osc2 = ctx.createOscillator(), g2 = ctx.createGain();
+    osc2.type = 'square';
+    osc2.frequency.value = freq * 2;
+    g2.gain.setValueAtTime(0.001, now);
+    g2.gain.exponentialRampToValueAtTime(0.05, now + 0.008);
+    g2.gain.exponentialRampToValueAtTime(0.001, now + 0.10);
+    osc2.connect(g2); g2.connect(ctx.destination);
+    osc2.start(now); osc2.stop(now + 0.14);
+  };
+  if (ctx.state !== 'running') ctx.resume().then(doPlay).catch(() => {});
+  else doPlay();
 }
 
-// The finish chime — a short rising two-note flourish
+// Finish chime — epic C major arpeggio resolving into a full chord with bass
 function playFinishChime() {
-  playTone(784, 0.18, 'sine');          // G5
-  setTimeout(() => playTone(1175, 0.35, 'sine'), 170); // D6
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const doPlay = () => {
+    const now = ctx.currentTime;
+    const notes = [
+      // Rising arpeggio: C5, E5, G5
+      { f: 523.25, t: 0.00, dur: 0.30, vol: 0.28 },
+      { f: 659.25, t: 0.13, dur: 0.30, vol: 0.28 },
+      { f: 783.99, t: 0.26, dur: 0.30, vol: 0.28 },
+      // Full C major chord hit: C5 + E5 + G5 + C6
+      { f: 523.25, t: 0.40, dur: 0.80, vol: 0.20 },
+      { f: 659.25, t: 0.40, dur: 0.80, vol: 0.20 },
+      { f: 783.99, t: 0.40, dur: 0.80, vol: 0.20 },
+      { f: 1046.5, t: 0.40, dur: 0.85, vol: 0.30 },
+      // Bass hit
+      { f: 261.63, t: 0.40, dur: 0.55, vol: 0.18 },
+    ];
+    notes.forEach(({ f, t, dur, vol }) => {
+      const osc = ctx.createOscillator();
+      const g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      g.gain.setValueAtTime(0.001, now + t);
+      g.gain.exponentialRampToValueAtTime(vol, now + t + 0.015);
+      g.gain.exponentialRampToValueAtTime(0.001, now + t + dur);
+      osc.connect(g); g.connect(ctx.destination);
+      osc.start(now + t); osc.stop(now + t + dur + 0.05);
+    });
+  };
+  if (ctx.state !== 'running') ctx.resume().then(doPlay).catch(() => {});
+  else doPlay();
+}
+
+// PB fanfare — grand orchestral shape: ascending motif then massive chord with reverb
+function playPBChime() {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  const doPlay = () => {
+    const now = ctx.currentTime;
+
+    // Simple room reverb via short delay + feedback
+    const delayNode = ctx.createDelay(0.5);
+    const fbGain    = ctx.createGain();
+    const wetGain   = ctx.createGain();
+    delayNode.delayTime.value = 0.17;
+    fbGain.gain.value  = 0.28;
+    wetGain.gain.value = 0.30;
+    delayNode.connect(fbGain);
+    fbGain.connect(delayNode);
+    delayNode.connect(ctx.destination);
+
+    // Master bus — dry signal + feed into reverb
+    const master = ctx.createGain();
+    master.gain.value = 1.0;
+    master.connect(ctx.destination);
+    master.connect(wetGain);
+    wetGain.connect(delayNode);
+
+    const note = (f, t, dur, vol) => {
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = f;
+      g.gain.setValueAtTime(0.001, now + t);
+      g.gain.exponentialRampToValueAtTime(vol, now + t + 0.018);
+      g.gain.exponentialRampToValueAtTime(0.001, now + t + dur);
+      osc.connect(g); g.connect(master);
+      osc.start(now + t); osc.stop(now + t + dur + 0.1);
+    };
+
+    // Rising motif: C5 -> G5 -> C6
+    note(523.25, 0.00, 0.16, 0.32); // C5
+    note(783.99, 0.17, 0.16, 0.32); // G5
+    note(1046.5, 0.34, 0.28, 0.36); // C6
+
+    // Grand chord blast at 0.54s — 7 notes from deep bass to top
+    note(130.81, 0.54, 1.40, 0.24); // C3 deep bass
+    note(261.63, 0.54, 1.35, 0.20); // C4
+    note(392.00, 0.54, 1.25, 0.16); // G4
+    note(523.25, 0.54, 1.25, 0.18); // C5
+    note(659.25, 0.54, 1.25, 0.18); // E5
+    note(783.99, 0.54, 1.25, 0.18); // G5
+    note(1046.5, 0.54, 1.45, 0.30); // C6 top — sustains longest
+  };
+  if (ctx.state !== 'running') ctx.resume().then(doPlay).catch(() => {});
+  else doPlay();
 }
 
 function startTimer(seconds) {
@@ -2842,6 +3264,16 @@ function bindHomeEvents() {
   });
 }
 
+const QUOTES = [
+  '"Shoes on. Water in hand. We\'re not negotiating today."',
+  '"Consistency over intensity. Every single time."',
+  '"You don\'t have to feel like it. You just have to start."',
+  '"The set you almost skipped is the one that counts most."',
+  '"Progress is built in the sessions nobody sees."',
+  '"You\'ve done harder things than this."',
+  '"Tired is a feeling. Quitting is a choice."'
+];
+
 function renderHomeState() {
   // Energy
   document.querySelectorAll('.energy-btn').forEach(b => b.classList.toggle('active', b.dataset.energy === state.energy));
@@ -2851,10 +3283,13 @@ function renderHomeState() {
   });
   // Where
   document.querySelectorAll('.where-btn').forEach(b => b.classList.toggle('active', b.dataset.where === state.where));
-  // Date
+  // Date + quote
   const today = new Date();
   const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  document.getElementById('todayDate').textContent = `${days[today.getDay()].toUpperCase()} ${today.getDate()}`;
+  document.querySelector('.today-label').textContent = days[today.getDay()].toUpperCase();
+  document.getElementById('todayDate').textContent = today.getDate();
+  const quoteEl = document.getElementById('todayQuote');
+  if (quoteEl) quoteEl.textContent = QUOTES[today.getDay()];
 }
 
 // ===== TABS =====
@@ -2868,6 +3303,7 @@ function switchTab(tab) {
     renderWorkout();
     bindDatePicker();
     bindSessionNotesEvents();
+    bindWarmupEvents();
     updateSessionTimer();
   }
   if (tab === 'progress') {
@@ -2895,7 +3331,7 @@ function logSession() {
   let totalSets = 0;
   let totalReps = 0;
 
-  getActiveExercises().forEach(ex => {
+  [...getActiveExercises(), ...(showCooldown ? COOLDOWN : [])].forEach(ex => {
     const exState = state.exercises[ex.id];
     if (!exState) return;
     const variant = ex.alternates[exState.altIdx];
@@ -2927,7 +3363,8 @@ function logSession() {
     id: Date.now(),
     date: sessionDate.toISOString(),
     category: WORKOUTS[activeWorkout]?.name || 'Workout',
-    location: state.where === 'gym' ? 'Gym' : 'Home',
+    location: state.where === 'gym' ? 'City Gym' : 'Home',
+    warmup: (state.warmupType && state.warmupType !== 'none') ? { type: state.warmupType, duration: state.warmupDuration } : null,
     energy: state.energy,
     totalSets,
     totalReps,
@@ -2947,6 +3384,7 @@ function logSession() {
   state.sessionNotes = { felt: '', nextTime: '' };
   state.energy = null;
   state.workoutDate = null;
+  state.warmupDuration = ''; // duration resets; warmupType persists as a preference
   // Clear any running hold timers
   Object.keys(holdTimers).forEach(k => {
     if (holdTimers[k].interval) clearInterval(holdTimers[k].interval);
@@ -2956,6 +3394,7 @@ function logSession() {
   saveState();
 
   showToast(session.hasPB ? '🏆 New PB logged' : 'Session logged ✓');
+  if (session.hasPB) setTimeout(playPBChime, 150);
   setTimeout(() => switchTab('progress'), 600);
 }
 
@@ -2990,48 +3429,108 @@ function renderProgress() {
     const d = new Date(s.date);
     const dateStr = d.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
     const tag = interpretSession(s);
-    const exDetails = s.exercises.map(e => {
-      const setStrs = e.sets.map(set => formatRepsDisplay(set)).join(' / ');
-      // Find the weight used (first non-empty weight, or BW if all bw)
-      const weights = e.sets.map(set => set.bw ? 'BW' : (set.weight || '')).filter(w => w);
-      const uniqueWeights = [...new Set(weights)];
-      let weightLabel = '';
-      if (uniqueWeights.length === 1) {
-        weightLabel = uniqueWeights[0] === 'BW' ? 'BW' : `${uniqueWeights[0]}kg`;
-      } else if (uniqueWeights.length > 1) {
-        // Mixed weights — show range or list
-        const nums = uniqueWeights.filter(w => w !== 'BW');
-        if (nums.length > 0) {
-          weightLabel = nums.length === 1 ? `${nums[0]}kg` : `${Math.min(...nums.map(Number))}–${Math.max(...nums.map(Number))}kg`;
+    const isExpanded = expandedSessions.has(s.id);
+
+    const warmupStr = s.warmup ? ` · 🔥 ${s.warmup.type}${s.warmup.duration ? ` ${s.warmup.duration}min` : ''}` : '';
+    const summaryLine = `${s.totalSets} sets · ${s.totalReps} reps${s.energy ? ` · ${energyEmoji(s.energy)} ${s.energy}` : ''}${s.durationMs ? ` · ${Math.floor(s.durationMs / 60000)}min` : ''}${warmupStr}`;
+
+    let detailHtml = '';
+    if (isExpanded) {
+      const exDetails = s.exercises.map(e => {
+        const setStrs = e.sets.map(set => formatRepsDisplay(set)).join(' / ');
+        const weights = e.sets.map(set => set.bw ? 'BW' : (set.weight || '')).filter(w => w);
+        const uniqueWeights = [...new Set(weights)];
+        let weightLabel = '';
+        if (uniqueWeights.length === 1) {
+          weightLabel = uniqueWeights[0] === 'BW' ? 'BW' : `${uniqueWeights[0]}kg`;
+        } else if (uniqueWeights.length > 1) {
+          const nums = uniqueWeights.filter(w => w !== 'BW');
+          if (nums.length > 0) {
+            weightLabel = nums.length === 1 ? `${nums[0]}kg` : `${Math.min(...nums.map(Number))}–${Math.max(...nums.map(Number))}kg`;
+          }
         }
-      }
-      return `
-        <div class="session-ex">
-          <div class="session-ex-name">${e.name}</div>
-          <div class="session-ex-detail">${weightLabel ? `<span class="session-ex-wt">${weightLabel}</span> · ` : ''}${setStrs}</div>
-          ${e.notes ? `<div class="session-ex-note">${e.notes}</div>` : ''}
+        return `
+          <div class="session-ex">
+            <div class="session-ex-name">${e.name}</div>
+            <div class="session-ex-detail">${weightLabel ? `<span class="session-ex-wt">${weightLabel}</span> · ` : ''}${setStrs}</div>
+            ${e.notes ? `<div class="session-ex-note">${e.notes}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      const feltVal = (s.notes && s.notes.felt) ? s.notes.felt.replace(/"/g, '&quot;') : '';
+      const nextVal = (s.notes && s.notes.nextTime) ? s.notes.nextTime.replace(/"/g, '&quot;') : '';
+
+      detailHtml = `
+        <div class="session-exercises">${exDetails}</div>
+        <div class="session-notes-edit">
+          <div class="session-notes-row">
+            <div class="session-notes-lbl">Felt</div>
+            <input class="session-notes-input" value="${feltVal}"
+                   onchange="updateSessionNote(${s.id}, 'felt', this.value)"
+                   placeholder="strong / average / flat">
+          </div>
+          <div class="session-notes-row">
+            <div class="session-notes-lbl">Next time</div>
+            <input class="session-notes-input" value="${nextVal}"
+                   onchange="updateSessionNote(${s.id}, 'nextTime', this.value)"
+                   placeholder="↑ weight / ↑ reps / same">
+          </div>
+        </div>
+        <div class="session-actions">
+          <button class="session-action-btn danger" onclick="event.stopPropagation(); deleteSession(${s.id})">Delete</button>
         </div>
       `;
-    }).join('');
+    }
 
     return `
       <div class="session-card">
-        <div class="session-top">
-          <div class="session-date">${dateStr.toUpperCase()}${s.hasPB ? '<span class="session-pb">🏆 PB</span>' : ''}</div>
-          <div class="session-loc">${s.location}</div>
-        </div>
-        <div class="session-summary">${s.totalSets} sets · ${s.totalReps} reps${s.energy ? ` · ${energyEmoji(s.energy)} ${s.energy}` : ''}${s.durationMs ? ` · ${Math.floor(s.durationMs / 60000)}min` : ''}</div>
-        ${tag ? `<div class="session-tag">${tag}</div>` : ''}
-        <div class="session-exercises">${exDetails}</div>
-        ${(s.notes && (s.notes.felt || s.notes.nextTime)) ? `
-          <div class="session-exercises" style="margin-top:8px; padding-top:8px;">
-            ${s.notes.felt ? `<div class="session-ex-note"><strong style="color:var(--text-dim)">Felt:</strong> ${s.notes.felt}</div>` : ''}
-            ${s.notes.nextTime ? `<div class="session-ex-note"><strong style="color:var(--text-dim)">Next:</strong> ${s.notes.nextTime}</div>` : ''}
+        <div class="session-card-header" onclick="toggleSessionCard(${s.id})">
+          <div class="session-top">
+            <div>
+              <div class="session-date">${dateStr.toUpperCase()}${s.hasPB ? '<span class="session-pb">🏆 PB</span>' : ''}</div>
+              <div class="session-cat-label">${s.category || ''}</div>
+            </div>
+            <div class="session-top-right">
+              <div class="session-loc">${s.location}</div>
+              <span class="session-chevron">${isExpanded ? '▲' : '▼'}</span>
+            </div>
           </div>
-        ` : ''}
+          <div class="session-summary">${summaryLine}</div>
+          ${tag ? `<div class="session-tag">${tag}</div>` : ''}
+        </div>
+        ${detailHtml}
       </div>
     `;
   }).join('');
+}
+
+function toggleSessionCard(sessionId) {
+  if (expandedSessions.has(sessionId)) {
+    expandedSessions.delete(sessionId);
+  } else {
+    expandedSessions.add(sessionId);
+  }
+  renderProgress();
+  renderHeatmap();
+}
+
+function deleteSession(sessionId) {
+  if (!confirm('Delete this session? This cannot be undone.')) return;
+  state.history = state.history.filter(s => s.id !== sessionId);
+  expandedSessions.delete(sessionId);
+  saveState();
+  renderProgress();
+  renderHeatmap();
+  showToast('Session deleted');
+}
+
+function updateSessionNote(sessionId, field, value) {
+  const session = state.history.find(s => s.id === sessionId);
+  if (!session) return;
+  session.notes = session.notes || {};
+  session.notes[field] = value;
+  saveState();
 }
 
 function energyEmoji(e) {
@@ -3067,8 +3566,25 @@ function interpretSession(s) {
 
 function calcStreak(sessions) {
   if (sessions.length === 0) return 0;
-  const dates = [...new Set(sessions.map(s => new Date(s.date).toDateString()))];
-  return dates.length; // simple count; can refine to consecutive days later
+  const trainedMs = new Set(sessions.map(s => {
+    const d = new Date(s.date);
+    d.setHours(0, 0, 0, 0);
+    return d.getTime();
+  }));
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  // Allow streak to include today even if not yet trained
+  let check = new Date(today);
+  if (!trainedMs.has(check.getTime())) {
+    check.setDate(check.getDate() - 1);
+    if (!trainedMs.has(check.getTime())) return 0;
+  }
+  let streak = 0;
+  while (trainedMs.has(check.getTime())) {
+    streak++;
+    check.setDate(check.getDate() - 1);
+  }
+  return streak;
 }
 
 // ===== LAST SESSION & PB LOOKUP =====
@@ -3302,6 +3818,11 @@ function quickStartLast() {
       reps: '', weight: '', bw: variant.bwDefault, done: false, hold: isHold
     }));
   });
+  // Restore warmup type from that session
+  if (last.warmup) {
+    state.warmupType = last.warmup.type;
+    state.warmupDuration = last.warmup.duration || '';
+  }
   saveState();
   switchTab('workout');
   showToast(`Loaded last ${last.category} setup`);
@@ -3343,6 +3864,28 @@ function renderHeatmap() {
   }
   html += '</div>';
   grid.innerHTML = html;
+}
+
+// ===== WARMUP SELECTOR =====
+function bindWarmupEvents() {
+  document.querySelectorAll('.warmup-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      state.warmupType = btn.dataset.warmup;
+      document.querySelectorAll('.warmup-btn').forEach(b => b.classList.toggle('active', b.dataset.warmup === state.warmupType));
+      const durRow = document.getElementById('warmupDurRow');
+      if (durRow) durRow.style.display = state.warmupType === 'none' ? 'none' : 'grid';
+      saveState();
+    });
+  });
+  const durInput = document.getElementById('warmupDuration');
+  if (durInput) {
+    durInput.value = state.warmupDuration || '';
+    durInput.oninput = e => { state.warmupDuration = e.target.value; saveState(); };
+  }
+  // Restore saved state
+  document.querySelectorAll('.warmup-btn').forEach(b => b.classList.toggle('active', b.dataset.warmup === (state.warmupType || 'none')));
+  const durRow = document.getElementById('warmupDurRow');
+  if (durRow) durRow.style.display = (state.warmupType && state.warmupType !== 'none') ? 'grid' : 'none';
 }
 
 // ===== SESSION NOTES =====
@@ -3443,6 +3986,7 @@ PUSH.forEach(ex => ensureExerciseState(ex.id));
 LOWER_BODY.forEach(ex => ensureExerciseState(ex.id));
 SPLITS.forEach(ex => ensureExerciseState(ex.id));
 CONDITIONING.forEach(ex => ensureExerciseState(ex.id));
+COOLDOWN.forEach(ex => ensureExerciseState(ex.id));
 saveState();
 </script>
 
