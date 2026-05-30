@@ -3,21 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=no">
+
+<!-- PWA: standalone fullscreen, no browser chrome -->
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Workout">
+
+<!-- theme-color: status bar tint in Safari + Android Chrome -->
 <meta name="theme-color" content="#0a0a0a">
+<meta name="msapplication-TileColor" content="#0a0a0a">
+
 <title>Workout</title>
-<!-- Home-screen / bookmark icon. iOS uses apple-touch-icon when you
-     tap Share > Add to Home Screen. 180 is the primary size; the others
-     cover older devices and Android/Chrome. -->
-<link rel="apple-touch-icon" href="images/app-icon-180.png">
-<link rel="apple-touch-icon" sizes="180x180" href="images/app-icon-180.png">
-<link rel="apple-touch-icon" sizes="167x167" href="images/app-icon-167.png">
-<link rel="apple-touch-icon" sizes="152x152" href="images/app-icon-152.png">
-<link rel="apple-touch-icon" sizes="120x120" href="images/app-icon-120.png">
-<link rel="icon" type="image/png" sizes="192x192" href="images/app-icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="images/app-icon-512.png">
+
+<!-- Web app manifest (Android/Chrome install + icon) -->
+<link rel="manifest" href="manifest.json">
+
+<!-- iOS home-screen icons — paths fixed to root (icons are NOT inside images/) -->
+<link rel="apple-touch-icon" href="app-icon-180.png">
+<link rel="apple-touch-icon" sizes="180x180" href="app-icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="app-icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="app-icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="app-icon-120.png">
+
+<!-- Standard favicon / Android -->
+<link rel="icon" type="image/png" sizes="192x192" href="app-icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="app-icon-512.png">
+
+<!-- iOS splash screens — dark background matching app (#0a0a0a) for each major device -->
+<link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="splash/splash-1290x2796.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="splash/splash-1179x2556.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="splash/splash-1170x2532.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 428px) and (device-height: 926px) and (-webkit-device-pixel-ratio: 3)" href="splash/splash-1284x2778.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 812px) and (-webkit-device-pixel-ratio: 3)" href="splash/splash-1125x2436.png">
+<link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="splash/splash-750x1334.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
