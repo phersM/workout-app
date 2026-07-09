@@ -230,6 +230,7 @@
     border-color: var(--border-strong);
     color: var(--text);
   }
+  .energy-btn:active { transform: scale(0.94); }
   .energy-btn .emoji { display: block; font-size: 22px; margin-bottom: 4px; }
   .energy-btn[data-energy="average"].active {
     border-color: var(--accent);
@@ -264,8 +265,11 @@
     padding: 12px 14px;
     border-bottom: 1px solid var(--border);
     cursor: pointer;
+    transition: background 0.15s ease;
   }
   .checklist-item:last-child { border-bottom: none; }
+  .checklist-item:active { background: var(--bg-elevated); }
+  .checklist-item:active .checkbox { transform: scale(0.9); }
   .checkbox {
     width: 22px;
     height: 22px;
@@ -307,7 +311,9 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    transition: transform 0.12s ease-out, border-color 0.15s ease;
   }
+  .day-card:active:not(.disabled) { transform: scale(0.97); border-color: var(--border-strong); }
   .day-card::before {
     content: '';
     position: absolute;
@@ -476,7 +482,9 @@
     font-size: 12px;
     cursor: pointer;
     text-align: center;
+    transition: background 0.15s ease, transform 0.12s ease-out;
   }
+  .where-btn:active { background: var(--bg-elevated); transform: scale(0.96); }
   .where-btn.active {
     background: var(--bg-elevated);
     border-color: var(--border-strong);
@@ -682,7 +690,9 @@
     align-items: center;
     justify-content: center;
     background: transparent;
+    transition: transform 0.12s ease-out, background 0.15s ease, border-color 0.15s ease;
   }
+  .set-check:active { transform: scale(0.85); }
   .set-check.done {
     background: var(--accent);
     border-color: var(--accent);
@@ -997,8 +1007,9 @@
     text-transform: uppercase;
     position: relative;
   }
-  .tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+  .tab svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.8; transition: transform 0.12s ease-out; }
   .tab.active { color: var(--accent); }
+  .tab:active svg { transform: scale(0.85); }
   .tab-indicator {
     position: absolute;
     top: 0;
@@ -1162,8 +1173,28 @@
     transition: transform 0.3s ease;
     box-shadow: var(--shadow);
     letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    max-width: calc(100vw - 40px);
   }
   .toast.show { transform: translateX(-50%) translateY(0); }
+  .toast-msg { white-space: nowrap; }
+  .toast-action {
+    background: transparent;
+    border: none;
+    border-left: 1px solid rgba(0,0,0,0.25);
+    color: #000;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding-left: 14px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .toast-action:active { opacity: 0.55; }
 
 
   /* Last session reference */
@@ -1356,8 +1387,9 @@
     justify-content: space-between;
     gap: 12px;
     box-shadow: inset 0 0 0 1px rgba(212,255,58,0.05), 0 2px 12px rgba(0,0,0,0.2);
+    transition: transform 0.12s ease-out;
   }
-  .quick-start:active { background: var(--bg-elevated); }
+  .quick-start:active { background: var(--bg-elevated); transform: scale(0.98); }
   .quick-start-info { flex: 1; min-width: 0; }
   .quick-start-lbl {
     font-family: 'JetBrains Mono', monospace;
@@ -1437,6 +1469,63 @@
   .heatmap-cell.today {
     box-shadow: inset 0 0 0 1.5px var(--text);
   }
+
+  /* Exercise trend sparklines */
+  .trends-block { margin-bottom: 20px; }
+  .trends-rail {
+    display: flex;
+    gap: 10px;
+    overflow-x: auto;
+    padding: 2px 2px 8px;
+    margin: 0 -2px;
+    scroll-snap-type: x proximity;
+    -webkit-overflow-scrolling: touch;
+  }
+  .trends-rail::-webkit-scrollbar { display: none; }
+  .trend-card {
+    flex: 0 0 128px;
+    scroll-snap-align: start;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--ex-rail, var(--accent));
+    border-radius: 12px;
+    padding: 12px 12px 10px;
+    transition: transform 0.12s ease-out;
+  }
+  .trend-card:active { transform: scale(0.97); background: var(--bg-elevated); }
+  .trend-name {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    line-height: 1.3;
+    height: 26px;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
+  .trend-value-row { display: flex; align-items: baseline; gap: 4px; margin-top: 8px; }
+  .trend-value { font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--text); line-height: 1; }
+  .trend-unit {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    color: var(--text-faint);
+    text-transform: uppercase;
+  }
+  .trend-delta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    margin-top: 3px;
+    letter-spacing: 0.02em;
+  }
+  .trend-delta.up { color: var(--success); }
+  .trend-delta.down { color: var(--danger); }
+  .trend-delta.flat { color: var(--text-faint); }
+  .trend-spark { display: block; margin-top: 8px; width: 100%; height: 26px; overflow: visible; }
+  .trend-spark polyline { fill: none; stroke: var(--ex-rail, var(--accent)); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .trend-spark circle { fill: var(--ex-rail, var(--accent)); }
 
   /* Session card PB indicator */
   .session-pb {
@@ -1929,6 +2018,11 @@
         <div class="stat-num" id="statStreak">0</div>
         <div class="stat-lbl">Streak Days</div>
       </div>
+    </div>
+
+    <div class="trends-block" id="trendsBlock" style="display:none;">
+      <div class="heatmap-title">Trending</div>
+      <div class="trends-rail" id="trendsRail"></div>
     </div>
 
     <div class="heatmap-block" id="heatmapBlock">
@@ -3769,8 +3863,10 @@ function renderHomeState() {
 }
 
 // ===== TABS =====
+const TAB_ORDER = ['home', 'workout', 'progress'];
+
 function switchTab(tab) {
-  const tabIndex = ['home', 'workout', 'progress'].indexOf(tab);
+  const tabIndex = TAB_ORDER.indexOf(tab);
   const doSwitch = () => {
     document.querySelectorAll('.tab').forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -3788,6 +3884,7 @@ function switchTab(tab) {
     if (tab === 'progress') {
       renderProgress();
       renderHeatmap();
+      renderTrends();
     }
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
@@ -3796,6 +3893,44 @@ function switchTab(tab) {
   } else {
     doSwitch();
   }
+}
+
+// ===== SWIPE BETWEEN TABS =====
+// One-handed-phone gesture to match tap nav. Ignored when the gesture starts
+// inside a horizontally-scrolling element (e.g. the trends rail) or a text input.
+function bindTabSwipe() {
+  const app = document.querySelector('.app');
+  if (!app) return;
+  let sx = 0, sy = 0, st = 0, tracking = false;
+
+  app.addEventListener('touchstart', e => {
+    if (e.touches.length !== 1) { tracking = false; return; }
+    const target = e.target;
+    if (target.closest('.trends-rail, input, textarea, select, .pb-overlay.visible')) {
+      tracking = false;
+      return;
+    }
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+    st = Date.now();
+    tracking = true;
+  }, { passive: true });
+
+  app.addEventListener('touchend', e => {
+    if (!tracking) return;
+    tracking = false;
+    const touch = e.changedTouches[0];
+    const dx = touch.clientX - sx;
+    const dy = touch.clientY - sy;
+    const dt = Date.now() - st;
+    if (dt > 700 || Math.abs(dx) < 55 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+
+    const current = document.querySelector('.tab.active')?.dataset.tab || 'home';
+    const idx = TAB_ORDER.indexOf(current);
+    const nextIdx = dx < 0 ? idx + 1 : idx - 1; // swipe left -> next tab, swipe right -> previous
+    if (nextIdx < 0 || nextIdx >= TAB_ORDER.length) return;
+    switchTab(TAB_ORDER[nextIdx]);
+  }, { passive: true });
 }
 
 function openWorkout(workoutKey) {
@@ -4012,16 +4147,35 @@ function toggleSessionCard(sessionId) {
   }
   renderProgress();
   renderHeatmap();
+  renderTrends();
 }
 
+// Soft-delete: removes immediately (no blocking confirm) but keeps the session
+// in memory for a few seconds so a mis-tap can be undone from the toast.
+let lastDeletedSession = null;
+
 function deleteSession(sessionId) {
-  if (!confirm('Delete this session? This cannot be undone.')) return;
-  state.history = state.history.filter(s => s.id !== sessionId);
+  const index = state.history.findIndex(s => s.id === sessionId);
+  if (index === -1) return;
+  lastDeletedSession = { session: state.history[index], index };
+  state.history.splice(index, 1);
   expandedSessions.delete(sessionId);
   saveState();
   renderProgress();
   renderHeatmap();
-  showToast('Session deleted');
+  renderTrends();
+  showToast('Session deleted', { actionLabel: 'Undo', onAction: undoDeleteSession, duration: 4500 });
+}
+
+function undoDeleteSession() {
+  if (!lastDeletedSession) return;
+  state.history.splice(lastDeletedSession.index, 0, lastDeletedSession.session);
+  lastDeletedSession = null;
+  saveState();
+  renderProgress();
+  renderHeatmap();
+  renderTrends();
+  showToast('Session restored');
 }
 
 function updateSessionNote(sessionId, field, value) {
@@ -4327,21 +4481,21 @@ function quickStartLast() {
   showToast(`Loaded last ${last.category} setup`);
 }
 
+// Map each workout category to its rail colour — shared by heatmap + trend cards
+const CATEGORY_COLOUR = {
+  'Pull + Core':   '#ffd23a',
+  'Push':          '#ff4040',
+  'Lower Body':    '#3aa0ff',
+  'Splits + Flex': '#3affb3',
+  'Conditioning':  '#b362ff',
+};
+
 // ===== HEATMAP =====
 function renderHeatmap() {
   const grid = document.getElementById('heatmapGrid');
   if (!grid) return;
   const today = new Date();
   today.setHours(0, 0, 0, 0);
-
-  // Map each workout category to its rail colour
-  const CATEGORY_COLOUR = {
-    'Pull + Core':   '#ffd23a',
-    'Push':          '#ff4040',
-    'Lower Body':    '#3aa0ff',
-    'Splits + Flex': '#3affb3',
-    'Conditioning':  '#b362ff',
-  };
 
   // Build date → colour map; history is newest-first so reverse so newest wins
   const trainedDays = new Map();
@@ -4375,6 +4529,110 @@ function renderHeatmap() {
   }
   html += '</div>';
   grid.innerHTML = html;
+}
+
+// ===== EXERCISE TRENDS =====
+// Per-exercise history across sessions: max weight lifted (or max hold-seconds /
+// max reps for bodyweight moves) each session it appears in. Powers the sparkline
+// rail on the Progress tab so the user can see progression, not just log density.
+function buildExerciseTrends() {
+  const sessions = [...(state.history || [])].reverse(); // oldest -> newest
+  const byName = new Map();
+
+  sessions.forEach(s => {
+    const rail = CATEGORY_COLOUR[s.category] || null;
+    (s.exercises || []).forEach(e => {
+      const weighted = e.sets.filter(set => set.weight && !set.bw && !isNaN(parseFloat(set.weight)));
+      const holds = e.sets.filter(set => set.hold && set.reps);
+      const reps = e.sets.filter(set => set.reps && !set.hold);
+      let value = null, unit = '';
+      if (weighted.length) {
+        value = Math.max(...weighted.map(set => parseFloat(set.weight)));
+        unit = 'kg';
+      } else if (holds.length) {
+        value = Math.max(...holds.map(set => parseInt(set.reps)));
+        unit = 's';
+      } else if (reps.length) {
+        value = Math.max(...reps.map(set => parseInt(set.reps)));
+        unit = 'reps';
+      }
+      if (value === null || isNaN(value)) return;
+      if (!byName.has(e.name)) byName.set(e.name, { rail, points: [] });
+      const entry = byName.get(e.name);
+      if (rail) entry.rail = rail;
+      entry.points.push({ date: s.date, value, unit });
+    });
+  });
+
+  // An exercise can change logging mode over time (e.g. assisted pull-ups at
+  // 20kg for weeks, then done at bodyweight → reps). Comparing across units
+  // would chart a fake collapse, so keep only points in the latest unit.
+  return [...byName.entries()]
+    .map(([name, data]) => {
+      const unit = data.points[data.points.length - 1].unit;
+      const points = data.points.filter(p => p.unit === unit).slice(-10);
+      return { name, rail: data.rail, unit, points };
+    })
+    .filter(t => t.points.length >= 3);
+}
+
+function renderTrends() {
+  const block = document.getElementById('trendsBlock');
+  const rail = document.getElementById('trendsRail');
+  if (!block || !rail) return;
+
+  const trends = buildExerciseTrends();
+  if (trends.length === 0) {
+    block.style.display = 'none';
+    rail.innerHTML = '';
+    return;
+  }
+
+  // Most recently trained exercise first
+  trends.sort((a, b) => {
+    const aLast = new Date(a.points[a.points.length - 1].date).getTime();
+    const bLast = new Date(b.points[b.points.length - 1].date).getTime();
+    return bLast - aLast;
+  });
+
+  rail.innerHTML = trends.slice(0, 8).map(t => {
+    const vals = t.points.map(p => p.value);
+    const min = Math.min(...vals), max = Math.max(...vals);
+    const w = 100, h = 26, pad = 3;
+    const range = (max - min) || 1;
+    const stepX = (w - pad * 2) / (vals.length - 1);
+    const coords = vals.map((v, i) => [
+      pad + i * stepX,
+      max === min ? h / 2 : (h - pad) - ((v - min) / range) * (h - pad * 2)
+    ]);
+    const [lastX, lastY] = coords[coords.length - 1];
+
+    const last = vals[vals.length - 1];
+    const prev = vals[vals.length - 2];
+    const diff = last - prev;
+    const diffStr = `${Math.abs(diff) % 1 === 0 ? Math.abs(diff) : Math.abs(diff).toFixed(1)}${t.unit === 'reps' ? '' : t.unit}`;
+    let deltaCls = 'flat', deltaStr = 'flat';
+    if (diff > 0) { deltaCls = 'up'; deltaStr = `▲ +${diffStr}`; }
+    else if (diff < 0) { deltaCls = 'down'; deltaStr = `▼ -${diffStr}`; }
+
+    const safeName = String(t.name).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return `
+      <div class="trend-card" style="${t.rail ? `--ex-rail:${t.rail}` : ''}">
+        <div class="trend-name">${safeName}</div>
+        <div class="trend-value-row">
+          <span class="trend-value">${last}</span>
+          <span class="trend-unit">${t.unit}</span>
+        </div>
+        <div class="trend-delta ${deltaCls}">${deltaStr}</div>
+        <svg class="trend-spark" viewBox="0 0 100 26" preserveAspectRatio="none">
+          <polyline points="${coords.map(c => c.join(',')).join(' ')}" />
+          <circle cx="${lastX}" cy="${lastY}" r="2.4" />
+        </svg>
+      </div>
+    `;
+  }).join('');
+
+  block.style.display = '';
 }
 
 // ===== WARMUP SELECTOR =====
@@ -4482,11 +4740,26 @@ function importJSON(event) {
 }
 
 // ===== TOAST =====
-function showToast(msg) {
+// opts: { actionLabel, onAction, duration } — pass actionLabel/onAction to show an
+// inline undo-style button (e.g. deleteSession); plain calls behave as before.
+function showToast(msg, opts = {}) {
   const toast = document.getElementById('toast');
-  toast.textContent = msg;
+  const { actionLabel, onAction, duration = 2200 } = opts;
+  clearTimeout(toast._hideTimer);
+
+  if (actionLabel && onAction) {
+    toast.innerHTML = `<span class="toast-msg">${msg}</span><button class="toast-action" type="button">${actionLabel}</button>`;
+    toast.querySelector('.toast-action').addEventListener('click', () => {
+      clearTimeout(toast._hideTimer);
+      toast.classList.remove('show');
+      onAction();
+    });
+  } else {
+    toast.textContent = msg;
+  }
+
   toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2200);
+  toast._hideTimer = setTimeout(() => toast.classList.remove('show'), duration);
 }
 
 // ===== PB CELEBRATION =====
@@ -4525,6 +4798,7 @@ function dismissPBOverlay() {
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => switchTab(t.dataset.tab));
 });
+bindTabSwipe();
 
 loadState();
 if (state.activeWorkout && WORKOUTS[state.activeWorkout]) {
