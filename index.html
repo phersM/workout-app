@@ -48,8 +48,8 @@
     --border: #2a2a2a;
     --border-strong: #3a3a3a;
     --text: #f5f5f5;
-    --text-dim: #888;
-    --text-faint: #555;
+    --text-dim: #a3a3a3;   /* was #888 — ~4.9:1 on cards, borderline for small mono labels */
+    --text-faint: #7d7d7d; /* was #555 — 2.3:1, a hard WCAG fail; new-user "can't see it" grey */
     --accent: #d4ff3a;
     --accent-dim: #9bc52a;
     --rail-pull: #ffd23a;
@@ -1126,10 +1126,14 @@
   }
   .session-ex-note {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-    color: var(--text-faint);
-    font-style: italic;
-    margin-top: 2px;
+    font-size: 11px;
+    color: var(--text);
+    background: rgba(212, 255, 58, 0.06);
+    border-left: 2px solid var(--accent);
+    border-radius: 4px;
+    padding: 4px 8px;
+    line-height: 1.45;
+    margin-top: 4px;
     letter-spacing: 0.02em;
   }
   .empty-state {
@@ -1727,6 +1731,19 @@
     from { transform: scale(0.5) translateY(16px); opacity: 0; }
     to   { transform: scale(1) translateY(0); opacity: 1; }
   }
+  /* Full-screen flash when a rest timer completes — visible even on silent */
+  #screenFlash {
+    position: fixed; inset: 0; z-index: 9999;
+    pointer-events: none;
+    background: var(--accent);
+    opacity: 0;
+  }
+  #screenFlash.go { animation: screenFlashAnim 0.9s ease-out; }
+  @keyframes screenFlashAnim {
+    0% { opacity: 0; }
+    15% { opacity: 0.55; }
+    100% { opacity: 0; }
+  }
 </style>
 </head>
 <body>
@@ -1873,7 +1890,7 @@
 
     <div class="where-row">
       <div class="where-label">Where</div>
-      <button class="where-btn active" data-where="gym">🏙️ City Gym</button>
+      <button class="where-btn active" data-where="gym">🏋️ Gym</button>
       <button class="where-btn" data-where="home">🏠 Home</button>
     </div>
 
@@ -1937,6 +1954,8 @@
 </div>
 
 <!-- Pop-out rest timer (large) — wrapper passes touches through so background still scrolls -->
+<div id="screenFlash"></div>
+
 <div class="timer-popout-wrap" id="timerPopoutWrap">
   <div class="timer-popout" id="timerPopout">
     <div class="timer-ring-wrap">
@@ -2615,6 +2634,149 @@ const CONDITIONING = [
   }
 ];
 
+const COOLDOWN_PULL = [
+  {
+    id: 'cd_pull_latchild',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: "Child's Pose (Lat Reach)",
+    alternates: [
+      { name: "Child's Pose Reach", cue: "Hips to heels. Arms reach long forward. Walk hands to one side to feel the lat. Hold, switch.", sets: 1, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: "Wide Child's Pose", cue: "Knees wide, hips back to heels. Arms reach forward. Breathe into the lower back and lats.", sets: 1, reps: '60s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_pull_latstretch',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Lat Doorframe Stretch',
+    alternates: [
+      { name: 'Lat Doorframe Stretch', cue: 'Hand on a frame or pole at shoulder height. Step back and hinge at the hips. Feel the lat lengthen.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' },
+      { name: 'Standing Lat Side Bend', cue: 'One arm overhead, gentle lean away. Reach through the fingertips. Breathe into the side.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' },
+      { name: 'Overhead Bar Hang', cue: 'Passive hang from a bar. Let gravity decompress the spine and open the lats.', sets: 1, reps: '30s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_pull_bicep',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Bicep & Forearm Stretch',
+    alternates: [
+      { name: 'Standing Bicep Stretch', cue: 'Arm straight behind you, thumb down, palm facing back. Gently rotate and lift. Feel the bicep lengthen.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' },
+      { name: 'Wall Wrist Flexor Stretch', cue: 'Hand on wall, fingers pointing down. Straighten elbow. Stretches forearm and bicep.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' },
+      { name: 'Prayer Stretch (Reverse)', cue: 'Back of hands together, fingers pointing down. Gently push down. Opens forearms and wrist flexors.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_pull_threadneedle',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Thread-the-Needle',
+    alternates: [
+      { name: 'Thread-the-Needle', cue: 'On all fours. Thread one arm under, shoulder to the floor. Feel the upper back and rhomboids open. Hold, switch.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' },
+      { name: 'Thoracic Extension', cue: 'Over a foam roller or chair edge. Let the upper back drape over it. Breathe into the chest opening.', sets: 1, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: 'Cat-Cow Flow', cue: 'On all fours. Round the back fully, then arch. Move with the breath. Decompress the spine.', sets: 1, reps: '60s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_pull_twist',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Supine Twist',
+    alternates: [
+      { name: 'Supine Twist', cue: 'On back. Knees to one side, arms wide. Both shoulders stay down. Switch sides.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: 'Seated Twist', cue: 'Cross-legged. Hand to opposite knee. Twist from the base of the spine.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_pull_breathing',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Box Breathing',
+    alternates: [
+      { name: 'Box Breathing', cue: 'In 4s · Hold 4s · Out 4s · Hold 4s. Activate the parasympathetic system. You earned this.', sets: 1, reps: '120s', bwDefault: true, kind: 'hold' },
+      { name: 'Savasana', cue: 'Lie flat. Arms wide, palms up. Eyes closed. Total surrender. You earned it.', sets: 1, reps: '120s', bwDefault: true, kind: 'hold' }
+    ]
+  }
+];
+
+const COOLDOWN_PUSH = [
+  {
+    id: 'cd_push_chest',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Chest Opener',
+    alternates: [
+      { name: 'Doorway Pec Stretch', cue: 'Forearm on frame, step through. Open the chest. Don\'t shrug. Hold each side.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: 'Corner Pec Stretch', cue: 'Both forearms on a corner. Lean in gently. Even stretch across the chest.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: 'Floor Pec Stretch', cue: 'Face down, one arm out wide. Roll gently toward that side. Breathe. Switch sides.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_push_shoulder',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Shoulder Stretch',
+    alternates: [
+      { name: 'Cross-body Shoulder Stretch', cue: 'Arm across body, gentle pull from the elbow. Posterior shoulder. Hold each side.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' },
+      { name: 'Sleeper Stretch', cue: 'On side, arm out at shoulder height, gently press the forearm down. Internal rotation. Easy.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' },
+      { name: 'Overhead Reach Hold', cue: 'One arm overhead, gentle side bend. Open the shoulder and ribcage.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_push_tricep',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Tricep Stretch',
+    alternates: [
+      { name: 'Overhead Tricep Stretch', cue: 'One arm overhead, bend at elbow, hand behind head. Other hand gently pulls the elbow. Hold each side.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' },
+      { name: 'Behind-back Tricep Reach', cue: 'Arm behind the back, reaching up the spine. Other hand at elbow, gentle press. Strap if you can\'t reach.', sets: 2, reps: '45s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_push_thoracic',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Thoracic Extension',
+    alternates: [
+      { name: 'Thoracic Extension', cue: 'Over a foam roller or chair edge. Let the upper back open. Breathe into the chest.', sets: 1, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: 'Cat-Cow Flow', cue: 'On all fours. Round fully, then arch. Move with the breath. Opens what pressing compresses.', sets: 1, reps: '60s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_push_twist',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Supine Twist',
+    alternates: [
+      { name: 'Supine Twist', cue: 'On back. Knees to one side, arms wide. Both shoulders down. Switch sides.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' },
+      { name: 'Seated Twist', cue: 'Cross-legged. Hand to opposite knee. Twist from the base of the spine.', sets: 2, reps: '60s', bwDefault: true, kind: 'hold' }
+    ]
+  },
+  {
+    id: 'cd_push_breathing',
+    block: 'Cool Down',
+    blockRail: 'var(--rail-cooldown)',
+    rail: 'var(--rail-cooldown)',
+    name: 'Box Breathing',
+    alternates: [
+      { name: 'Box Breathing', cue: 'In 4s · Hold 4s · Out 4s · Hold 4s. Activate the parasympathetic system. You earned this.', sets: 1, reps: '120s', bwDefault: true, kind: 'hold' },
+      { name: 'Savasana', cue: 'Lie flat. Arms wide, palms up. Eyes closed. Total surrender. You earned it.', sets: 1, reps: '120s', bwDefault: true, kind: 'hold' }
+    ]
+  }
+];
+
 const COOLDOWN = [
   {
     id: 'cd_childpose',
@@ -2684,6 +2846,16 @@ const COOLDOWN = [
   }
 ];
 
+// Maps each workout to its muscle-appropriate cooldown sequence
+const WORKOUT_COOLDOWN = {
+  'pull':         COOLDOWN_PULL,
+  'push':         COOLDOWN_PUSH,
+  'lower':        COOLDOWN,
+  'splits':       COOLDOWN,
+  'conditioning': COOLDOWN,
+  'cooldown':     COOLDOWN
+};
+
 // Workouts lookup — used by switchTab and openWorkout
 const WORKOUTS = {
   'pull': { name: 'Pull + Core', sub: 'Back · Biceps · Posture', exercises: PULL_CORE },
@@ -2705,6 +2877,7 @@ let state = {
   warmupType: 'none',
   warmupDuration: '',
   workoutDate: null,
+  workoutDateSetOn: null,
   sessionNotes: { felt: '', nextTime: '' },
   activeWorkout: 'pull',
   exercises: {},
@@ -2717,7 +2890,8 @@ let timerState = {
   remaining: 0,
   running: false,
   interval: null,
-  exerciseId: null
+  exerciseId: null,
+  endAt: null
 };
 
 // Hold timer state — keyed by `${exId}_${setIdx}` so multiple hold timers can run independently
@@ -2752,6 +2926,8 @@ function loadState() {
     if (raw) {
       const loaded = JSON.parse(raw);
       state = Object.assign(state, loaded);
+      // One-time label migration: 'City Gym' → 'Gym'
+      (state.history || []).forEach(s => { if (s.location === 'City Gym') s.location = 'Gym'; });
     }
   } catch (e) {
     console.warn('Load failed', e);
@@ -2793,6 +2969,12 @@ function findExerciseDef(exId) {
   // Search across all workouts for an exercise by id
   for (const key in WORKOUTS) {
     const found = WORKOUTS[key].exercises.find(e => e.id === exId);
+    if (found) return found;
+  }
+  // Per-day cooldown lists (COOLDOWN_PULL/PUSH) live outside WORKOUTS —
+  // without this, their state gets wiped on load and render crashes
+  for (const key in WORKOUT_COOLDOWN) {
+    const found = WORKOUT_COOLDOWN[key].find(e => e.id === exId);
     if (found) return found;
   }
   return null;
@@ -2938,13 +3120,15 @@ function renderWorkout() {
           <button class="rest-btn" data-rest="90">1:30<span class="rest-btn-lbl">Rest</span></button>
           <button class="rest-btn" data-rest="120">2:00<span class="rest-btn-lbl">Rest</span></button>
         </div>
-        <textarea class="ex-notes" placeholder="Notes for this exercise…" data-ex="${ex.id}" data-field="notes">${exState.notes}</textarea>
+        <textarea class="ex-notes" placeholder="Notes — machine, seat setting, how it felt…" data-ex="${ex.id}" data-field="notes">${exState.notes}</textarea>
       </div>
     `;
     container.appendChild(card);
   });
 
   // ===== COOL DOWN / STRETCH =====
+  // Skipped on the dedicated Cool Down day — its main list already IS the cooldown
+  if (activeWorkout !== 'cooldown') {
   const cdBtn = document.createElement('button');
   cdBtn.className = 'cooldown-toggle-btn' + (showCooldown ? ' active' : '');
   cdBtn.textContent = showCooldown ? '▲ Hide Cool Down / Stretch' : '▽ Cool Down / Stretch';
@@ -2958,7 +3142,8 @@ function renderWorkout() {
     cdTitle.textContent = 'Cool Down';
     container.appendChild(cdTitle);
 
-    COOLDOWN.forEach(ex => {
+    const activeCooldown = WORKOUT_COOLDOWN[activeWorkout] || COOLDOWN;
+    activeCooldown.forEach(ex => {
       const exState = ensureExerciseState(ex.id);
       const variant = ex.alternates[exState.altIdx];
       const lastSession = getLastSessionForExercise(variant.name);
@@ -3002,12 +3187,13 @@ function renderWorkout() {
               <button class="set-check ${s.done ? 'done' : ''}" data-ex="${ex.id}" data-set="${i}" data-field="done"></button>
             </div>
           `).join('')}
-          <textarea class="ex-notes" placeholder="Notes for this exercise…" data-ex="${ex.id}" data-field="notes">${exState.notes}</textarea>
+          <textarea class="ex-notes" placeholder="Notes — machine, seat setting, how it felt…" data-ex="${ex.id}" data-field="notes">${exState.notes}</textarea>
         </div>
       `;
       container.appendChild(cdCard);
     });
   }
+  } // end cooldown-day guard
 
   bindWorkoutEvents();
   // Restore visual state of any running hold timers after re-render
@@ -3231,6 +3417,9 @@ function getAudioCtx() {
   if (!audioCtx) {
     try {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      // iOS 17+: route as media playback so timer cues sound through the
+      // silent switch, like a music app
+      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
     } catch (e) {
       audioCtx = null;
     }
@@ -3238,13 +3427,38 @@ function getAudioCtx() {
   return audioCtx;
 }
 
-// Play a short tone. freq in Hz, duration in seconds.
-// Awaits resume() before scheduling so iOS doesn't silently drop notes on a
-// suspended context — the root cause of audio stopping after the first couple timers.
-function playTone(freq, duration, type) {
+// Timer cues are moment-in-time sounds. If the context can't resume within a
+// short window (screen locked, app backgrounded), DROP the sound — a resume()
+// promise can hang until the NEXT user gesture, and firing the queued sound
+// then is the "fanfare replays when I start the next timer" bug.
+function playWhenRunning(doPlay) {
   const ctx = getAudioCtx();
   if (!ctx) return;
-  const doPlay = () => {
+  if (ctx.state === 'running') { doPlay(ctx); return; }
+  let expired = false;
+  setTimeout(() => { expired = true; }, 250);
+  ctx.resume().then(() => {
+    if (!expired && ctx.state === 'running') doPlay(ctx);
+  }).catch(() => {});
+}
+
+// Keep the context unlocked: every user touch is a chance to (re)resume it
+document.addEventListener('pointerdown', () => {
+  if (audioCtx && audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
+}, { passive: true });
+
+// Visual backup for the finish chime — a lime flash you can't miss
+function flashScreen() {
+  const el = document.getElementById('screenFlash');
+  if (!el) return;
+  el.classList.remove('go');
+  void el.offsetWidth;
+  el.classList.add('go');
+}
+
+// Play a short tone. freq in Hz, duration in seconds.
+function playTone(freq, duration, type) {
+  playWhenRunning(ctx => {
     try {
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
@@ -3259,23 +3473,16 @@ function playTone(freq, duration, type) {
       osc.start(now);
       osc.stop(now + duration + 0.02);
     } catch (e) {}
-  };
-  if (ctx.state !== 'running') {
-    ctx.resume().then(doPlay).catch(() => {});
-  } else {
-    doPlay();
-  }
+  });
 }
 
 // Countdown beep — ascending scale tones (C5 → E5 → G5 at 3 → 2 → 1).
 // Reads timerState.remaining so each second plays a different pitch,
 // building harmonic tension that the finish chime then resolves.
 function playCountdownBeep() {
-  const ctx = getAudioCtx();
-  if (!ctx) return;
   const pitchMap = { 3: 523.25, 2: 659.25, 1: 783.99 };
   const freq = pitchMap[timerState.remaining] || 523.25;
-  const doPlay = () => {
+  playWhenRunning(ctx => {
     const now = ctx.currentTime;
     // Main square wave — bright, clean, game-like
     const osc1 = ctx.createOscillator(), g1 = ctx.createGain();
@@ -3295,16 +3502,12 @@ function playCountdownBeep() {
     g2.gain.exponentialRampToValueAtTime(0.001, now + 0.10);
     osc2.connect(g2); g2.connect(ctx.destination);
     osc2.start(now); osc2.stop(now + 0.14);
-  };
-  if (ctx.state !== 'running') ctx.resume().then(doPlay).catch(() => {});
-  else doPlay();
+  });
 }
 
 // Finish chime — epic C major arpeggio resolving into a full chord with bass
 function playFinishChime() {
-  const ctx = getAudioCtx();
-  if (!ctx) return;
-  const doPlay = () => {
+  playWhenRunning(ctx => {
     const now = ctx.currentTime;
     const notes = [
       // Rising arpeggio: C5, E5, G5
@@ -3330,16 +3533,12 @@ function playFinishChime() {
       osc.connect(g); g.connect(ctx.destination);
       osc.start(now + t); osc.stop(now + t + dur + 0.05);
     });
-  };
-  if (ctx.state !== 'running') ctx.resume().then(doPlay).catch(() => {});
-  else doPlay();
+  });
 }
 
 // PB fanfare — grand orchestral shape: ascending motif then massive chord with reverb
 function playPBChime() {
-  const ctx = getAudioCtx();
-  if (!ctx) return;
-  const doPlay = () => {
+  playWhenRunning(ctx => {
     const now = ctx.currentTime;
 
     // Simple room reverb via short delay + feedback
@@ -3384,15 +3583,16 @@ function playPBChime() {
     note(659.25, 0.54, 1.25, 0.18); // E5
     note(783.99, 0.54, 1.25, 0.18); // G5
     note(1046.5, 0.54, 1.45, 0.30); // C6 top — sustains longest
-  };
-  if (ctx.state !== 'running') ctx.resume().then(doPlay).catch(() => {});
-  else doPlay();
+  });
 }
 
 function startTimer(seconds) {
   timerState.total = seconds;
   timerState.remaining = seconds;
   timerState.running = true;
+  // Wall-clock anchor — setInterval freezes when the screen locks, so
+  // remaining time is always derived from this, never from tick counting
+  timerState.endAt = Date.now() + seconds * 1000;
   // Unlock audio on this user gesture
   getAudioCtx();
   // Show both the bottom bar and the large pop-out
@@ -3413,10 +3613,14 @@ function startTimer(seconds) {
 
 function tickTimer() {
   if (!timerState.running) return;
-  timerState.remaining--;
+  const prev = timerState.remaining;
+  timerState.remaining = Math.max(0, Math.ceil((timerState.endAt - Date.now()) / 1000));
+  if (timerState.remaining === prev) return;
   updateTimerDisplay();
   if (timerState.remaining <= 0) {
-    finishTimer();
+    // If we're catching up after a screen lock the moment has long passed —
+    // finish quietly instead of blasting the chime late
+    finishTimer(Date.now() - timerState.endAt > 2000);
   } else if (timerState.remaining <= 3) {
     // Audio cue on each of the final 3 seconds
     playCountdownBeep();
@@ -3428,12 +3632,20 @@ function tickTimer() {
   }
 }
 
+// Catch up immediately when the app returns to the foreground mid-countdown
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && timerState.running && timerState.endAt) tickTimer();
+});
+
 // Called when the countdown reaches zero — chime, then auto-close the pop-out.
-function finishTimer() {
+function finishTimer(late) {
   timerState.running = false;
   if (timerState.interval) clearInterval(timerState.interval);
-  playFinishChime();
-  if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+  if (!late) {
+    playFinishChime();
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+  }
+  flashScreen();
   const pop = document.getElementById('timerPopout');
   pop.classList.remove('warning');
   pop.classList.add('finished');
@@ -3478,6 +3690,8 @@ function updateTimerDisplay() {
 
 function toggleTimer() {
   timerState.running = !timerState.running;
+  // Re-anchor the wall clock on resume so paused time doesn't count
+  if (timerState.running) timerState.endAt = Date.now() + timerState.remaining * 1000;
   const label = timerState.running ? 'Pause' : 'Resume';
   document.getElementById('timerPause').textContent = label;
   const popPause = document.getElementById('timerPopoutPause');
@@ -3602,7 +3816,16 @@ function logSession() {
   let totalSets = 0;
   let totalReps = 0;
 
-  [...getActiveExercises(), ...(showCooldown ? COOLDOWN : [])].forEach(ex => {
+  // Log from the same cooldown list the user saw (not the generic one), and
+  // regardless of whether the section is currently collapsed. Dedupe by id —
+  // on the dedicated Cool Down day the main and cooldown lists are identical.
+  const activeCooldown = WORKOUT_COOLDOWN[activeWorkout] || COOLDOWN;
+  const seenIds = new Set();
+  [...getActiveExercises(), ...activeCooldown].filter(ex => {
+    if (seenIds.has(ex.id)) return false;
+    seenIds.add(ex.id);
+    return true;
+  }).forEach(ex => {
     const exState = state.exercises[ex.id];
     if (!exState) return;
     const variant = ex.alternates[exState.altIdx];
@@ -3634,7 +3857,7 @@ function logSession() {
     id: Date.now(),
     date: sessionDate.toISOString(),
     category: WORKOUTS[activeWorkout]?.name || 'Workout',
-    location: state.where === 'gym' ? 'City Gym' : 'Home',
+    location: state.where === 'gym' ? 'Gym' : 'Home',
     warmup: (state.warmupType && state.warmupType !== 'none') ? { type: state.warmupType, duration: state.warmupDuration } : null,
     energy: state.energy,
     totalSets,
@@ -3655,6 +3878,7 @@ function logSession() {
   state.sessionNotes = { felt: '', nextTime: '' };
   state.energy = null;
   state.workoutDate = null;
+  state.workoutDateSetOn = null;
   state.warmupDuration = ''; // duration resets; warmupType persists as a preference
   // Clear any running hold timers
   Object.keys(holdTimers).forEach(k => {
@@ -3727,7 +3951,7 @@ function renderProgress() {
           <div class="session-ex">
             <div class="session-ex-name">${e.name}</div>
             <div class="session-ex-detail">${weightLabel ? `<span class="session-ex-wt">${weightLabel}</span> · ` : ''}${setStrs}</div>
-            ${e.notes ? `<div class="session-ex-note">${e.notes}</div>` : ''}
+            ${e.notes ? `<div class="session-ex-note">✎ ${e.notes}</div>` : ''}
           </div>
         `;
       }).join('');
@@ -4198,16 +4422,26 @@ function bindSessionNotesEvents() {
 }
 
 // ===== DATE PICKER =====
+// Local calendar date (toISOString would give the UTC date — wrong before ~9:30am in Adelaide)
+function localDateStr(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 function bindDatePicker() {
   const input = document.getElementById('workoutDateInput');
   if (!input) return;
-  const today = new Date();
-  const defaultDate = state.workoutDate || today.toISOString().slice(0, 10);
-  input.value = defaultDate;
-  state.workoutDate = defaultDate;
-  saveState();
+  const today = localDateStr();
+  // An explicit date pick only survives the day it was made — a stale saved
+  // date must never silently stamp a session logged days later.
+  if (state.workoutDate && state.workoutDateSetOn !== today) {
+    state.workoutDate = null;
+    state.workoutDateSetOn = null;
+    saveState();
+  }
+  input.value = state.workoutDate || today;
   input.onchange = e => {
     state.workoutDate = e.target.value;
+    state.workoutDateSetOn = localDateStr();
     saveState();
   };
 }
@@ -4218,7 +4452,7 @@ function exportJSON() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `workout-backup-${new Date().toISOString().slice(0, 10)}.json`;
+  a.download = `workout-backup-${localDateStr()}.json`;
   a.click();
   URL.revokeObjectURL(url);
   showToast('Backup downloaded');
@@ -4306,6 +4540,8 @@ LOWER_BODY.forEach(ex => ensureExerciseState(ex.id));
 SPLITS.forEach(ex => ensureExerciseState(ex.id));
 CONDITIONING.forEach(ex => ensureExerciseState(ex.id));
 COOLDOWN.forEach(ex => ensureExerciseState(ex.id));
+COOLDOWN_PULL.forEach(ex => ensureExerciseState(ex.id));
+COOLDOWN_PUSH.forEach(ex => ensureExerciseState(ex.id));
 saveState();
 </script>
 
