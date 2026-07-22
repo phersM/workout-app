@@ -870,6 +870,7 @@
   }
   .timer-popout-wrap.visible { display: flex; }
   .timer-popout {
+    position: relative;
     pointer-events: auto;
     background: var(--bg-elevated);
     border: 2px solid var(--accent);
@@ -879,6 +880,18 @@
     text-align: center;
     box-shadow: 0 12px 48px rgba(0,0,0,0.7);
   }
+  .timer-popout-dismiss {
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 30px; height: 30px;
+    border: none;
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .timer-popout-dismiss:active { transform: scale(0.85); color: var(--text); }
   .timer-ring-wrap {
     position: relative;
     width: 186px;
@@ -2042,7 +2055,7 @@
 
 <!-- Floating timer -->
 <div class="timer-bar" id="timerBar">
-  <div class="timer-info">
+  <div class="timer-info" onclick="reopenTimerPopout()">
     <div class="timer-display" id="timerDisplay">0:00</div>
     <div class="timer-label" id="timerLabel">Rest</div>
   </div>
@@ -2057,6 +2070,7 @@
 
 <div class="timer-popout-wrap" id="timerPopoutWrap">
   <div class="timer-popout" id="timerPopout">
+    <button class="timer-popout-dismiss" onclick="dismissTimerPopout()" aria-label="Hide, keep timer running">︾</button>
     <div class="timer-ring-wrap">
       <svg class="timer-ring-svg" viewBox="0 0 120 120" aria-hidden="true">
         <circle class="timer-ring-track" cx="60" cy="60" r="54"/>
@@ -2977,6 +2991,7 @@ let state = {
   warmupDuration: '',
   workoutDate: null,
   workoutDateSetOn: null,
+  workoutStartedOn: null,
   sessionNotes: { felt: '', nextTime: '' },
   activeWorkout: 'pull',
   exercises: {},
@@ -3518,14 +3533,20 @@ function getAudioCtx() {
   if (!audioCtx) {
     try {
       audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-      // iOS 17+: route as media playback so timer cues sound through the
-      // silent switch, like a music app
-      try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
     } catch (e) {
       audioCtx = null;
     }
   }
   return audioCtx;
+}
+
+// iOS 17+: mark cues as "transient" so they duck whatever else is playing
+// (music, podcasts) and the other app's audio resumes on its own afterwards —
+// as opposed to "playback", which claims the audio session exclusively and
+// stops other apps' audio outright. Reasserted on every cue (not just at
+// context creation) since an interruption elsewhere can reset the category.
+function markTransientAudio() {
+  try { if (navigator.audioSession) navigator.audioSession.type = 'transient'; } catch (e) {}
 }
 
 // Timer cues are moment-in-time sounds. If the context can't resume within a
@@ -3535,9 +3556,10 @@ function getAudioCtx() {
 function playWhenRunning(doPlay) {
   const ctx = getAudioCtx();
   if (!ctx) return;
+  markTransientAudio();
   if (ctx.state === 'running') { doPlay(ctx); return; }
   let expired = false;
-  setTimeout(() => { expired = true; }, 250);
+  setTimeout(() => { expired = true; }, 500);
   ctx.resume().then(() => {
     if (!expired && ctx.state === 'running') doPlay(ctx);
   }).catch(() => {});
@@ -3799,6 +3821,19 @@ function toggleTimer() {
   if (popPause) popPause.textContent = label;
 }
 
+// Hide the big pop-out only — the small bottom bar stays visible and the
+// countdown/audio cues keep running untouched. Tapping the bar brings it back.
+function dismissTimerPopout() {
+  const wrap = document.getElementById('timerPopoutWrap');
+  if (wrap) wrap.classList.remove('visible');
+}
+
+function reopenTimerPopout() {
+  if (!timerState.running && timerState.remaining <= 0) return;
+  const wrap = document.getElementById('timerPopoutWrap');
+  if (wrap) wrap.classList.add('visible');
+}
+
 function cancelTimer() {
   timerState.running = false;
   if (timerState.interval) clearInterval(timerState.interval);
@@ -4020,7 +4055,14 @@ function logSession() {
     return;
   }
 
-  const sessionDate = state.workoutDate ? new Date(state.workoutDate + 'T12:00:00') : new Date();
+  // Priority: explicit date-picker pick (deliberate backdating) > the day the
+  // workout actually started, as long as that was today or yesterday
+  // (autoStartSessionTimer — covers a session that ran past midnight, or got
+  // logged the next morning) > right now (covers a session left half-done for
+  // days, where silently backdating to the stale start day would be wrong).
+  const startedRecently = state.workoutStartedOn && daysAgo(state.workoutStartedOn) <= 1;
+  const loggedDay = state.workoutDate || (startedRecently ? state.workoutStartedOn : null);
+  const sessionDate = loggedDay ? new Date(loggedDay + 'T12:00:00') : new Date();
 
   const session = {
     id: Date.now(),
@@ -4048,6 +4090,7 @@ function logSession() {
   state.energy = null;
   state.workoutDate = null;
   state.workoutDateSetOn = null;
+  state.workoutStartedOn = null;
   state.warmupDuration = ''; // duration resets; warmupType persists as a preference
   // Clear any running hold timers
   Object.keys(holdTimers).forEach(k => {
@@ -4415,6 +4458,14 @@ function toggleSessionTimer() {
 // no elapsed time banked). This means a deliberate manual pause is never
 // overridden — once you've paused, only the Resume button restarts it.
 function autoStartSessionTimer() {
+  // Also pins the calendar day this workout actually began on, independent of
+  // whatever time it finally gets logged — a session started before midnight
+  // and logged after it must still land on the day it was done, not the day
+  // "Log Session" happened to be tapped. See logSession().
+  if (!state.workoutStartedOn) {
+    state.workoutStartedOn = localDateStr();
+    saveState();
+  }
   if (sessionTimer.running) return;
   if (sessionTimer.elapsed > 0) return;   // already started then paused — leave it
   if (sessionTimer.startTime) return;     // already started
@@ -4717,6 +4768,18 @@ function bindSessionNotesEvents() {
 // Local calendar date (toISOString would give the UTC date — wrong before ~9:30am in Adelaide)
 function localDateStr(d = new Date()) {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Calendar days between a 'YYYY-MM-DD' string and today (local). Used to tell
+// "started just before/after midnight" (0 or 1) apart from "abandoned this
+// half-done session days ago" (should NOT silently backdate on eventual log).
+function daysAgo(dateStr) {
+  if (!dateStr) return Infinity;
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const then = new Date(y, m - 1, d);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((today - then) / 86400000);
 }
 
 function bindDatePicker() {
