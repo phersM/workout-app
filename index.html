@@ -1851,9 +1851,49 @@
     15% { opacity: 0.55; }
     100% { opacity: 0; }
   }
+
+  /* First-paint brand splash — same mark as the native iOS launch images
+     (splash/*.png), shown for a beat while state loads then handed off
+     to Home. Hidden by the INIT block at the bottom of the script. */
+  #splashScreen {
+    position: fixed; inset: 0; z-index: 10000;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background-color: var(--bg);
+    background-image: radial-gradient(circle at 50% 42%, rgba(212,255,58,0.12), transparent 55%);
+    transition: opacity 350ms ease;
+  }
+  #splashScreen.hide { opacity: 0; pointer-events: none; }
+  .splash-dot {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 40px 8px rgba(212,255,58,0.35);
+    animation: splashPulse 1.6s ease-in-out infinite;
+  }
+  .splash-word {
+    margin-top: 22px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 700;
+    font-size: 26px;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    text-transform: uppercase;
+  }
+  @keyframes splashPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(0.85); opacity: 0.75; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .splash-dot { animation: none; }
+  }
 </style>
 </head>
 <body>
+
+<div id="splashScreen">
+  <div class="splash-dot"></div>
+  <div class="splash-word">Workout</div>
+</div>
 
 <div class="app">
 
@@ -4931,6 +4971,21 @@ COOLDOWN.forEach(ex => ensureExerciseState(ex.id));
 COOLDOWN_PULL.forEach(ex => ensureExerciseState(ex.id));
 COOLDOWN_PUSH.forEach(ex => ensureExerciseState(ex.id));
 saveState();
+
+// ===== SPLASH =====
+// Everything above has now run synchronously, so Home is actually rendered
+// and ready — just enforce a small minimum hold so the splash doesn't
+// flicker away instantly on a fast reload, then fade it out.
+(function hideSplash() {
+  const el = document.getElementById('splashScreen');
+  if (!el) return;
+  const MIN_MS = 450, FADE_MS = 350;
+  const wait = Math.max(0, MIN_MS - performance.now());
+  setTimeout(() => {
+    el.classList.add('hide');
+    setTimeout(() => el.remove(), FADE_MS);
+  }, wait);
+})();
 </script>
 
 </body>
