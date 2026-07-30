@@ -3570,6 +3570,19 @@ document.addEventListener('pointerdown', () => {
   if (audioCtx && audioCtx.state !== 'running') audioCtx.resume().catch(() => {});
 }, { passive: true });
 
+// iOS WebKit quirk: after the page is backgrounded (switching to another
+// app, screen lock) the existing AudioContext can come back reporting
+// state 'running' after resume() while actually staying silent — a known
+// zombie-context bug. Drop it on return to the foreground so the next cue
+// lazily builds a fresh context via getAudioCtx() instead of trusting one
+// that survived the interruption.
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && audioCtx) {
+    try { audioCtx.close(); } catch (e) {}
+    audioCtx = null;
+  }
+});
+
 // Visual backup for the finish chime — a lime flash you can't miss
 function flashScreen() {
   const el = document.getElementById('screenFlash');
@@ -4056,11 +4069,15 @@ function logSession() {
   }
 
   // Priority: explicit date-picker pick (deliberate backdating) > the day the
-  // workout actually started, as long as that was today or yesterday
-  // (autoStartSessionTimer — covers a session that ran past midnight, or got
-  // logged the next morning) > right now (covers a session left half-done for
-  // days, where silently backdating to the stale start day would be wrong).
-  const startedRecently = state.workoutStartedOn && daysAgo(state.workoutStartedOn) <= 1;
+  // workout actually started, but ONLY if it was yesterday AND it's still
+  // early morning now (autoStartSessionTimer — covers a session that ran
+  // past midnight and got logged shortly after) > right now. Without the
+  // early-morning check, a stray tap that pinned workoutStartedOn yesterday
+  // (session never actually logged that day) would silently backdate a
+  // session actually done and logged today, any time of day.
+  const startedRecently = state.workoutStartedOn
+    && daysAgo(state.workoutStartedOn) === 1
+    && new Date().getHours() < 6;
   const loggedDay = state.workoutDate || (startedRecently ? state.workoutStartedOn : null);
   const sessionDate = loggedDay ? new Date(loggedDay + 'T12:00:00') : new Date();
 
