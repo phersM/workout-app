@@ -2010,8 +2010,12 @@
       <feDisplacementMap in="SourceGraphic" in2="n" scale="44" xChannelSelector="R" yChannelSelector="G" result="d"/>
       <feGaussianBlur in="d" stdDeviation="30"/>
     </filter>
+    <!-- numOctaves 2, not 4. feTurbulence cost scales with octaves and this is
+         rasterised at device resolution — on a phone at DPR 3 that is ~9x the
+         pixels this costs on a desktop. At this displacement scale the extra
+         two octaves are invisible under the noise they feed. -->
     <filter id="spWick" x="-30%" y="-20%" width="160%" height="140%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.010 0.024" numOctaves="4" seed="23" result="n"/>
+      <feTurbulence type="fractalNoise" baseFrequency="0.010 0.024" numOctaves="2" seed="23" result="n"/>
       <feDisplacementMap in="SourceGraphic" in2="n" scale="130" xChannelSelector="R" yChannelSelector="G"/>
     </filter>
 
@@ -2123,10 +2127,24 @@
       <stop offset="0" stop-color="#4a4a4a"/>
       <stop offset="1" stop-color="#ffffff"/>
     </linearGradient>
+    <!-- PERF: only the moving EDGE is filtered. A single rect ran turbulence over
+         1640x3400 when just the top ~240 units actually vary — everything below
+         the front is flat white and needs no noise at all. Filtering a 480-tall
+         strip is ~7x less turbulence to rasterise, and that rasterisation lands
+         exactly when the climb starts, which is where the jitter was.
+         The transform also moved onto the wrapper <g>: with the filtered rect
+         static, the browser can cache the filter output and merely translate it
+         rather than re-deriving it as the element moves.
+         The 80-unit overlap is not slack — feDisplacementMap scale=130 shifts
+         edges by up to +/-65, so the rects must overlap by more than that or a
+         torn seam opens along the front. -->
     <mask id="spMClimb" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="2120">
       <rect x="0" y="0" width="1000" height="2120" fill="#4a4a4a"/>
-      <rect class="sp-climb-rect" x="-320" y="0" width="1640" height="3400"
-            fill="url(#spClimbGrad)" filter="url(#spWick)"/>
+      <g class="sp-climb-rect">
+        <rect x="-320" y="0" width="1640" height="480"
+              fill="url(#spClimbGrad)" filter="url(#spWick)"/>
+        <rect x="-320" y="400" width="1640" height="3000" fill="#ffffff"/>
+      </g>
     </mask>
 
     <linearGradient id="spBandGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="300">
@@ -2135,9 +2153,12 @@
       <stop offset=".62" stop-color="#8a8a8a"/>
       <stop offset="1"   stop-color="#000"/>
     </linearGradient>
+    <!-- same trick: transform on the wrapper, filtered rect static inside -->
     <mask id="spMBand" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="2120">
-      <rect class="sp-band-rect" x="-320" y="0" width="1640" height="300"
-            fill="url(#spBandGrad)" filter="url(#spWick)"/>
+      <g class="sp-band-rect">
+        <rect x="-320" y="0" width="1640" height="300"
+              fill="url(#spBandGrad)" filter="url(#spWick)"/>
+      </g>
     </mask>
 
     <!-- a struck line, not a drawn one: it burns out at both ends -->
