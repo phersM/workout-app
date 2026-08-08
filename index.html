@@ -50,9 +50,9 @@
 <!-- Cormorant Garamond is the splash wordmark only; folded into the existing
      request rather than a second one so it costs no extra round trip -->
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:wght@300&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<!-- the splash paints at first frame but its mountain is a 530KB PNG; without
+<!-- the splash paints at first frame but its mountain is a 268KB image; without
      this the ink arrives after the climb has already started -->
-<link rel="preload" as="image" href="launch/peak-v5.png">
+<link rel="preload" as="image" href="launch/splash-mtn.webp">
 <style>
   :root {
     --bg: #0a0a0a;
@@ -1980,8 +1980,10 @@
   @keyframes spRuleIn { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: none; } }
   @keyframes spStudioIn { to { opacity: .5; } }
 
-  .sp-ember { animation: spEmber 5.5s ease-in-out calc(var(--sp-lock) + 600ms) infinite; }
-  @keyframes spEmber { 0%, 100% { opacity: .5; } 50% { opacity: .85; } }
+  /* The summit sparks used to breathe on their own loop. They are baked into
+     splash-mtn.webp now, so there is nothing left to animate — and an idle
+     infinite animation on a filtered layer was work the phone paid for every
+     frame it was on screen, for an effect almost nobody would name. */
 
   /* Reduced motion: show the finished mark and lockup, skip the choreography.
      The climb front has to be parked at its END position or the mountain is
@@ -1991,7 +1993,6 @@
     .sp-band-rect, .sp-pulse { animation: none; opacity: 0; }
     .sp-frame, .sp-lock-app, .sp-lock-rule, .sp-lock-kind { animation: none; opacity: 1; }
     .sp-lock-studio { animation: none; opacity: .5; }
-    .sp-ember { animation: none; opacity: .68; }
   }
 </style>
 </head>
@@ -2001,96 +2002,16 @@
 <svg class="sp-mark" viewBox="0 0 1000 2120" preserveAspectRatio="xMidYMid meet"
      xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
   <defs>
-    <filter id="spRoughLine" x="-12%" y="-12%" width="124%" height="124%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.018" numOctaves="2" seed="11" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
-    <filter id="spBleed" x="-30%" y="-30%" width="160%" height="160%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.006" numOctaves="2" seed="3" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="44" xChannelSelector="R" yChannelSelector="G" result="d"/>
-      <feGaussianBlur in="d" stdDeviation="30"/>
-    </filter>
-    <!-- numOctaves 2, not 4. feTurbulence cost scales with octaves and this is
-         rasterised at device resolution — on a phone at DPR 3 that is ~9x the
-         pixels this costs on a desktop. At this displacement scale the extra
-         two octaves are invisible under the noise they feed. -->
-    <filter id="spWick" x="-30%" y="-20%" width="160%" height="140%">
-      <feTurbulence type="fractalNoise" baseFrequency="0.010 0.024" numOctaves="2" seed="23" result="n"/>
-      <feDisplacementMap in="SourceGraphic" in2="n" scale="130" xChannelSelector="R" yChannelSelector="G"/>
-    </filter>
+    <!-- NO FILTERS. Everything that was composed live — the alpha->luminance
+         pass, three gaussian blurs, two hue-rotate passes, and the turbulence
+         feeding the reveal front — is baked by launch/source/build-splash-raster.py
+         into splash-mtn.webp / splash-halo.webp / splash-front.png.
+         None of that work was ever per-frame by nature: the painting never
+         changes, only the reveal position does. The runtime is now three static
+         images and one translated mask. -->
 
-    <!-- peak-v5.png is near-black navy ink whose DENSITY lives in the alpha
-         channel — built to multiply onto white paper, so on black it reads as
-         nothing at all. Throw the painting's pixels away and keep only its
-         alpha: this copies A into RGB, giving a luminance map where loaded
-         brush = white, bare paper = black, which can then mask any fill.
-         Density → light inverts what the painting was made for, so the gamma
-         pushes midtones down; without it the mountain is one lit slab. -->
-    <filter id="spAlphaLum" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
-      <feColorMatrix type="matrix" values="0 0 0 1 0  0 0 0 1 0  0 0 0 1 0  0 0 0 0 1"/>
-      <feComponentTransfer>
-        <feFuncR type="gamma" exponent="1.45"/>
-        <feFuncG type="gamma" exponent="1.45"/>
-        <feFuncB type="gamma" exponent="1.45"/>
-      </feComponentTransfer>
-    </filter>
-    <mask id="spInkMask" maskUnits="userSpaceOnUse" x="-200" y="0" width="1400" height="1400">
-      <image href="launch/peak-v5.png" x="-102" y="57" width="1075" height="1075"
-             preserveAspectRatio="xMidYMid meet" filter="url(#spAlphaLum)"/>
-    </mask>
-
-    <!-- ORDER MATTERS: SVG applies `filter` BEFORE `mask`, so both on one
-         element blurs the un-masked rect (a no-op on flat colour) and then cuts
-         it sharply — no glow, just flat colour laid over the mass, which tints
-         the white ink instead of lighting it. Every bloom sits on a WRAPPER. -->
-    <filter id="spBloomF" x="-25%" y="-25%" width="150%" height="150%">
-      <feGaussianBlur stdDeviation="16"/>
-    </filter>
-    <filter id="spBloomWide" x="-40%" y="-40%" width="180%" height="180%">
-      <feGaussianBlur stdDeviation="48"/>
-    </filter>
-    <!-- glow OUTSIDE the silhouette only: blur, then subtract the shape back
-         out, so the pulse never washes across the ink itself -->
-    <filter id="spHaloRing" x="-45%" y="-45%" width="190%" height="190%">
-      <feGaussianBlur in="SourceGraphic" stdDeviation="42" result="b"/>
-      <feComposite in="b" in2="SourceGraphic" operator="out"/>
-    </filter>
-
-    <linearGradient id="spInkTone" gradientUnits="userSpaceOnUse" x1="120" y1="150" x2="820" y2="1040">
-      <stop offset="0"   stop-color="#ffffff"/>
-      <stop offset=".18" stop-color="#f6f8ee"/>
-      <stop offset=".42" stop-color="#e2e8d2"/>
-      <stop offset=".72" stop-color="#a8b39d"/>
-      <stop offset="1"   stop-color="#63736b"/>
-    </linearGradient>
-    <linearGradient id="spHaloTone" gradientUnits="userSpaceOnUse" x1="120" y1="150" x2="820" y2="1040">
-      <stop offset="0"   stop-color="#eaff8a"/>
-      <stop offset=".22" stop-color="#d4ff3a"/>
-      <stop offset=".6"  stop-color="#9bc52a"/>
-      <stop offset="1"   stop-color="#3f8a58"/>
-    </linearGradient>
-
-    <!-- the painting carries warm flecks at the summit; hue-shifted onto the
-         accent so the one saturated thing on screen is the app's own colour -->
-    <filter id="spEmberFx" color-interpolation-filters="sRGB" x="-10%" y="-10%" width="120%" height="120%">
-      <feColorMatrix type="saturate" values="2.4"/>
-      <feColorMatrix type="hueRotate" values="38"/>
-      <feComponentTransfer>
-        <feFuncR type="linear" slope="0.9"/><feFuncG type="linear" slope="1.45"/><feFuncB type="linear" slope="0.35"/>
-      </feComponentTransfer>
-    </filter>
-    <filter id="spEmberBloomFx" color-interpolation-filters="sRGB" x="-40%" y="-40%" width="180%" height="180%">
-      <feColorMatrix type="saturate" values="3"/>
-      <feColorMatrix type="hueRotate" values="38"/>
-      <feComponentTransfer>
-        <feFuncR type="linear" slope="1"/><feFuncG type="linear" slope="1.6"/><feFuncB type="linear" slope="0.15"/>
-      </feComponentTransfer>
-      <feGaussianBlur stdDeviation="17"/>
-    </filter>
-
-    <!-- the flank still carries ink where it meets x=0, so the canvas edge would
-         cut it flat; at this scale the right tail lands ~10 units off the edge,
-         so it gets a roll-off too -->
+    <!-- the flank still carries ink where it meets x=0, and the right tail lands
+         ~10 units off the edge, so both sides get a roll-off -->
     <linearGradient id="spEdgeFadeGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1000" y2="0">
       <stop offset="0"    stop-color="#000000"/>
       <stop offset=".030" stop-color="#2e2e2e"/>
@@ -2105,46 +2026,14 @@
       <rect x="0" y="0" width="1000" height="2120" fill="url(#spEdgeFadeGrad)"/>
     </mask>
 
-    <!-- the square is cut away by the painting's own density: solid mass hides
-         the line, mist lets it surface. This mask reads the ORIGINAL asset —
-         dark ink = 0 = hidden — so it survived the palette flip untouched. -->
-    <mask id="spFrameOcclude" maskUnits="userSpaceOnUse" x="-200" y="0" width="1400" height="1400">
-      <rect x="-200" y="0" width="1400" height="1400" fill="#fff"/>
-      <image href="launch/frame-occlude.png" x="-102" y="57" width="1075" height="1075"
-             preserveAspectRatio="xMidYMid meet"/>
-    </mask>
-
-    <!-- a flat grey floor under a rising gradient: above the front the mask is
-         dim (the mountain is present but cold), below it 1.0 (full ink). One
-         painting, one mask — a second full copy underneath would double the
-         render cost on a phone for the same picture.
-         The floor value is the whole legibility of the climb. At #787878 the
-         cold state sits too close to the lit state and the only thing that
-         reads is the lime band travelling; the ink never visibly comes up.
-         #4a4a4a keeps the summit readable so the mountain is clearly THERE and
-         waiting, while leaving the front room to mean something. -->
-    <linearGradient id="spClimbGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="240">
-      <stop offset="0" stop-color="#4a4a4a"/>
-      <stop offset="1" stop-color="#ffffff"/>
-    </linearGradient>
-    <!-- PERF: only the moving EDGE is filtered. A single rect ran turbulence over
-         1640x3400 when just the top ~240 units actually vary — everything below
-         the front is flat white and needs no noise at all. Filtering a 480-tall
-         strip is ~7x less turbulence to rasterise, and that rasterisation lands
-         exactly when the climb starts, which is where the jitter was.
-         The transform also moved onto the wrapper <g>: with the filtered rect
-         static, the browser can cache the filter output and merely translate it
-         rather than re-deriving it as the element moves.
-         The 80-unit overlap is not slack — feDisplacementMap scale=130 shifts
-         edges by up to +/-65, so the rects must overlap by more than that or a
-         torn seam opens along the front. -->
-    <mask id="spMClimb" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="2120">
-      <rect x="0" y="0" width="1000" height="2120" fill="#4a4a4a"/>
-      <g class="sp-climb-rect">
-        <rect x="-320" y="0" width="1640" height="480"
-              fill="url(#spClimbGrad)" filter="url(#spWick)"/>
-        <rect x="-320" y="400" width="1640" height="3000" fill="#ffffff"/>
-      </g>
+    <!-- THE CLIMB. A pre-torn edge, stretched over the travel and translated.
+         preserveAspectRatio="none" is deliberate: the mask is a 500x1800 ramp
+         stretched to 1640x3400, which lengthens the tear's horizontal
+         wavelength — the same long-wavelength rag the old feTurbulence made
+         with baseFrequency 0.010 across. -->
+    <mask id="spFront" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="2120">
+      <image class="sp-climb-rect" href="launch/splash-front.png"
+             x="-320" y="0" width="1640" height="3400" preserveAspectRatio="none"/>
     </mask>
 
     <linearGradient id="spBandGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="300">
@@ -2153,12 +2042,8 @@
       <stop offset=".62" stop-color="#8a8a8a"/>
       <stop offset="1"   stop-color="#000"/>
     </linearGradient>
-    <!-- same trick: transform on the wrapper, filtered rect static inside -->
     <mask id="spMBand" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="2120">
-      <g class="sp-band-rect">
-        <rect x="-320" y="0" width="1640" height="300"
-              fill="url(#spBandGrad)" filter="url(#spWick)"/>
-      </g>
+      <rect class="sp-band-rect" x="-320" y="0" width="1640" height="300" fill="url(#spBandGrad)"/>
     </mask>
 
     <!-- a struck line, not a drawn one: it burns out at both ends -->
@@ -2173,72 +2058,47 @@
 
   <rect x="0" y="0" width="1000" height="2120" fill="#0a0a0a"/>
 
-  <!-- spEdgeFade is applied OUTSIDE the placement transform so it stays locked
-       to the canvas edge rather than scaling with the painting -->
-  <g mask="url(#spEdgeFade)" style="isolation:isolate">
+  <!-- spEdgeFade stays locked to the canvas edge, outside everything else -->
+  <g mask="url(#spEdgeFade)">
 
+    <!-- The square, plain vector, no filter and no occlusion mask. It needs
+         neither: the mountain is drawn over it, and where the ink is dense the
+         image is opaque and simply covers the line, while sheer mist lets it
+         surface. The old frame-occlude.png existed for the paper version, where
+         the peak multiplied and multiply can only darken, never hide. -->
+    <!-- The fade class and the .17 must sit on DIFFERENT elements: a CSS
+         `opacity` from the animation beats an opacity presentation attribute on
+         the same element, which renders the square at full strength. -->
     <g class="sp-frame">
-      <g transform="translate(-28.04,57.43) scale(1.0977)">
-        <g mask="url(#spFrameOcclude)" filter="url(#spRoughLine)" fill="none"
-           stroke="#d4ff3a" stroke-width="2.8" stroke-linecap="round" opacity=".17">
-          <path d="M130,262 C320,257 560,266 870,260"/>
-          <path d="M868,260 C873,480 866,760 870,1000"/>
-          <path d="M870,999 C640,1004 360,995 130,1000"/>
-          <path d="M132,1000 C127,760 135,470 130,260"/>
-        </g>
+      <g fill="none" stroke="#d4ff3a" stroke-width="3"
+         stroke-linecap="round" opacity=".17">
+        <path d="M115,345 C323,340 586,350 927,343"/>
+        <path d="M925,343 C930,584 923,891 927,1155"/>
+        <path d="M927,1154 C674,1159 367,1150 115,1155"/>
+        <path d="M117,1155 C112,891 121,575 115,343"/>
       </g>
     </g>
 
-    <g mask="url(#spMClimb)">
-      <g transform="translate(-28.04,57.43) scale(1.0977)">
-        <!-- kept well down: this sits BEHIND a white mass, so anywhere the ink
-             runs thin it surfaces as a green stain on the rock -->
-        <g style="mix-blend-mode:screen">
-          <path filter="url(#spBleed)" fill="#24451b" opacity=".26"
-                d="M318,586 C356,452 424,318 486,222 C548,318 616,452 664,586 C580,626 400,626 318,586 Z"/>
-        </g>
-        <g filter="url(#spBloomWide)" opacity=".26" style="mix-blend-mode:screen">
-          <g mask="url(#spInkMask)"><rect x="-200" y="0" width="1400" height="1400" fill="url(#spHaloTone)"/></g>
-        </g>
-        <g filter="url(#spBloomF)" opacity=".14" style="mix-blend-mode:screen">
-          <g mask="url(#spInkMask)"><rect x="-200" y="0" width="1400" height="1400" fill="url(#spHaloTone)"/></g>
-        </g>
-        <g mask="url(#spInkMask)" style="mix-blend-mode:screen">
-          <rect x="-200" y="0" width="1400" height="1400" fill="url(#spInkTone)"/>
-        </g>
-        <g class="sp-ember" style="mix-blend-mode:screen">
-          <image href="launch/peak-v5.png" x="-102" y="57" width="1075" height="1075"
-                 preserveAspectRatio="xMidYMid meet" filter="url(#spEmberBloomFx)"/>
-        </g>
-        <image href="launch/peak-v5.png" x="-102" y="57" width="1075" height="1075"
-               preserveAspectRatio="xMidYMid meet" filter="url(#spEmberFx)" opacity=".4"
-               style="mix-blend-mode:screen"/>
-      </g>
+    <!-- the mountain, cold: present but unlit, waiting -->
+    <image href="launch/splash-mtn.webp" x="-140" y="120" width="1180" height="1180" opacity=".3"/>
+
+    <!-- the same image at full strength, revealed from below by the climb -->
+    <g mask="url(#spFront)">
+      <image href="launch/splash-mtn.webp" x="-140" y="120" width="1180" height="1180"/>
     </g>
 
-    <!-- the accent riding the leading edge of the climb -->
-    <g mask="url(#spMBand)">
-      <g transform="translate(-28.04,57.43) scale(1.0977)">
-        <g filter="url(#spBloomF)" opacity=".75" style="mix-blend-mode:screen">
-          <g mask="url(#spInkMask)"><rect x="-200" y="0" width="1400" height="1400" fill="#d4ff3a"/></g>
-        </g>
-        <g mask="url(#spInkMask)" opacity=".5" style="mix-blend-mode:screen">
-          <rect x="-200" y="0" width="1400" height="1400" fill="#eaff8a"/>
-        </g>
-      </g>
+    <!-- The accent riding the leading edge, baked. Tinting a lime rect through
+         the mountain's own luminance is the obvious construction and it cost a
+         single 470ms render frame — an image-to-luminance-mask conversion over
+         1180x1180. An <image> under a cheap gradient mask costs nothing. -->
+    <g mask="url(#spMBand)" style="mix-blend-mode:screen">
+      <image href="launch/splash-band.webp" x="-140" y="120" width="1180" height="1180"/>
     </g>
 
-    <!-- the answering pulse, fired with the lockup -->
-    <g class="sp-pulse">
-      <g transform="translate(-28.04,57.43) scale(1.0977)">
-        <g filter="url(#spHaloRing)" opacity=".85" style="mix-blend-mode:screen">
-          <g mask="url(#spInkMask)"><rect x="-200" y="0" width="1400" height="1400" fill="#d4ff3a"/></g>
-        </g>
-        <g mask="url(#spInkMask)" opacity=".07" style="mix-blend-mode:screen">
-          <rect x="-200" y="0" width="1400" height="1400" fill="#eaff8a"/>
-        </g>
-      </g>
-    </g>
+    <!-- the answering pulse: a baked ring outside the silhouette, so the swell
+         never washes lime across the ink itself -->
+    <image class="sp-pulse" href="launch/splash-halo.webp"
+           x="-140" y="120" width="1180" height="1180" style="mix-blend-mode:screen"/>
   </g>
 
   <!-- SVG letter-spacing trails the final glyph, so centred text needs
