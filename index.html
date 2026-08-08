@@ -30,7 +30,15 @@
 <link rel="icon" type="image/png" sizes="192x192" href="images/app-icon-192.png">
 <link rel="icon" type="image/png" sizes="512x512" href="images/app-icon-512.png">
 
-<!-- iOS splash screens — dark background matching app (#0a0a0a) for each major device -->
+<!-- iOS launch images. These are DELIBERATELY blank #0a0a0a — the same ground the
+     web splash paints on. They used to carry a lime-dot mark, which meant an
+     installed user saw one brand mark from iOS and then a different, animated one
+     the moment the web app booted. The native image should be the stage, not a
+     second performance; the splash below does the brand moment.
+     Do not delete these links to "remove" the blank screen: without a startup
+     image iOS shows WHITE while the app boots, which is a far worse flash into a
+     black splash. Blank-but-present is the point. -->
+<!-- Sizes must stay matched to the media queries below, per device. -->
 <link rel="apple-touch-startup-image" media="screen and (device-width: 430px) and (device-height: 932px) and (-webkit-device-pixel-ratio: 3)" href="splash/splash-1290x2796.png">
 <link rel="apple-touch-startup-image" media="screen and (device-width: 393px) and (device-height: 852px) and (-webkit-device-pixel-ratio: 3)" href="splash/splash-1179x2556.png">
 <link rel="apple-touch-startup-image" media="screen and (device-width: 390px) and (device-height: 844px) and (-webkit-device-pixel-ratio: 3)" href="splash/splash-1170x2532.png">
@@ -39,7 +47,12 @@
 <link rel="apple-touch-startup-image" media="screen and (device-width: 375px) and (device-height: 667px) and (-webkit-device-pixel-ratio: 2)" href="splash/splash-750x1334.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Cormorant Garamond is the splash wordmark only; folded into the existing
+     request rather than a second one so it costs no extra round trip -->
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:wght@300&family=JetBrains+Mono:wght@300;400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- the splash paints at first frame but its mountain is a 530KB PNG; without
+     this the ink arrives after the climb has already started -->
+<link rel="preload" as="image" href="launch/peak-v5.png">
 <style>
   :root {
     --bg: #0a0a0a;
@@ -1389,6 +1402,19 @@
     outline: none;
     border-color: var(--accent);
   }
+  /* Date lives in the same edit block as the notes, because "fix this log" is
+     one intent. color-scheme:dark is what makes the native picker render dark
+     instead of a white sheet punched into the card. */
+  .session-date-input {
+    color-scheme: dark;
+    text-align: left;
+  }
+  .session-date-input::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    opacity: .5;
+    cursor: pointer;
+  }
+  .session-date-input::-webkit-calendar-picker-indicator:hover { opacity: 1; }
   .session-notes-input::placeholder { color: var(--text-faint); }
 
   /* Quick-start last workout */
@@ -1486,6 +1512,34 @@
   }
   .heatmap-cell.today {
     box-shadow: inset 0 0 0 1.5px var(--text);
+  }
+  /* Heatmap swap-in: tiles fall into place like they're dropping off a wall.
+     Lifted from the pushup app's calendar (histTileFall), slowed a touch for
+     this grid — .5s/22ms against its .38s/12ms — so 28 tiles resolve in ~1.1s
+     instead of landing almost together.
+
+     Only active while `.hm-anim` sits on #heatmapGrid, and renderHeatmap() only
+     asks for it when Progress is actually ENTERED. That gate is the whole
+     trick: renderHeatmap() also runs when a session row is expanded, a session
+     is deleted, and when a delete is undone, and re-dropping the whole grid on
+     a row tap reads as a glitch rather than a flourish.
+
+     `backwards` matters — without it every tile is visible at full opacity
+     until its own delay elapses, and the stagger does nothing.
+
+     The stagger index is set inline per cell (--i) in renderHeatmap(); the
+     weekday labels share the grid but are deliberately excluded, so the
+     scaffold stays put and only the days fall. */
+  @keyframes hmTileFall {
+    from { opacity: 0; transform: translateY(-14px) rotate(-3deg); }
+    to   { opacity: 1; transform: none; }
+  }
+  .hm-anim .heatmap-cell {
+    animation: hmTileFall .5s cubic-bezier(.22,1,.36,1) backwards;
+    animation-delay: calc(var(--i, 0) * 22ms);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hm-anim .heatmap-cell { animation: none; }
   }
 
   /* Exercise trend sparklines */
@@ -1852,47 +1906,340 @@
     100% { opacity: 0; }
   }
 
-  /* First-paint brand splash — same mark as the native iOS launch images
-     (splash/*.png), shown for a beat while state loads then handed off
-     to Home. Hidden by the INIT block at the bottom of the script. */
+  /* ===== BRAND SPLASH — Ascent Workout =====
+     The sumi-e peak, recoloured into the app's own palette: the MASS is white
+     ink and the accent appears only in the light it throws — halo, square,
+     rule, summit sparks, pulse. The earlier navy-and-brass splash was a
+     separate brand world that no transition could reconcile with a
+     lime-on-black UI; this one belongs to the app it opens.
+
+     The reveal is the climb: a front rises through the mountain with the
+     accent riding its leading edge, answered by one halo pulse timed to the
+     lockup so the mark and the type land as a single event.
+
+     Everything is namespaced `sp-` / `sp*`, including the SVG defs ids, which
+     are document-global — this file is one 190KB document and the splash must
+     not be able to reach the app.
+
+     Timing lives in the three vars below; the hold in the SPLASH block at the
+     bottom of the script is derived from them. Removed from the DOM there. */
   #splashScreen {
+    --sp-climb-delay: 400ms;
+    --sp-climb-dur: 2800ms;
+    --sp-lock: 3300ms;
     position: fixed; inset: 0; z-index: 10000;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background-color: var(--bg);
-    background-image: radial-gradient(circle at 50% 42%, rgba(212,255,58,0.12), transparent 55%);
-    transition: opacity 350ms ease;
+    background: #0a0a0a;
+    transition: opacity 400ms ease;
   }
   #splashScreen.hide { opacity: 0; pointer-events: none; }
-  .splash-dot {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 40px 8px rgba(212,255,58,0.35);
-    animation: splashPulse 1.6s ease-in-out infinite;
+  /* grain over the whole screen, not the artboard: the artboard is 1000×2120
+     and a phone is a different shape, so a grain rect inside the SVG draws its
+     own visible seam at the letterbox */
+  #splashScreen::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    opacity: .045; mix-blend-mode: screen;
+    background: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' seed='5'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
   }
-  .splash-word {
-    margin-top: 22px;
-    font-family: 'Inter', sans-serif;
-    font-weight: 700;
-    font-size: 26px;
-    letter-spacing: 0.08em;
-    color: var(--text);
-    text-transform: uppercase;
+  .sp-mark { display: block; width: 100%; height: 100%; }
+
+  /* Both travels are fitted to the PAINTING (foot ≈1300, summit ≈277), not to
+     the canvas — run them the full artboard height and most of the duration is
+     spent crossing empty black. They also STOP just above the summit: a
+     decelerating curve spends its long tail on the last stretch, and if that
+     stretch is empty sky the climb finishes early and leaves a dead middle
+     before the lockup. Ending at the summit spends the deceleration on the
+     arrival, which is the moment worth slowing down for. The band shares the
+     front's from/to and curve exactly, or it drifts ahead and reads as a
+     scanner sweeping the artwork. */
+  .sp-climb-rect {
+    animation: spClimbUp var(--sp-climb-dur) cubic-bezier(.4,0,.6,1) var(--sp-climb-delay) both;
   }
-  @keyframes splashPulse {
-    0%, 100% { transform: scale(1); opacity: 1; }
-    50% { transform: scale(0.85); opacity: 0.75; }
+  @keyframes spClimbUp { from { transform: translateY(1120px); } to { transform: translateY(-60px); } }
+  .sp-band-rect {
+    animation: spBandUp var(--sp-climb-dur) cubic-bezier(.4,0,.6,1) var(--sp-climb-delay) both,
+               spBandOut 520ms ease-out calc(var(--sp-climb-delay) + var(--sp-climb-dur) - 300ms) forwards;
   }
+  @keyframes spBandUp { from { transform: translateY(1120px); } to { transform: translateY(-60px); } }
+  @keyframes spBandOut { to { opacity: 0; } }
+
+  /* Weighted almost entirely into the ring: any real strength on the mass and
+     the pulse just flips the mountain to lime for a moment, which is the exact
+     look the white-ink direction exists to avoid. */
+  .sp-pulse { opacity: 0; animation: spPulseOnce 1100ms cubic-bezier(.2,.7,.3,1) var(--sp-lock) both; }
+  @keyframes spPulseOnce { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
+
+  .sp-frame { opacity: 0; animation: spFadeIn 1100ms ease-out 260ms forwards; }
+  @keyframes spFadeIn { to { opacity: 1; } }
+
+  .sp-lock-app    { opacity: 0; animation: spRise 700ms cubic-bezier(.2,.7,.3,1) var(--sp-lock) forwards; }
+  .sp-lock-rule   { opacity: 0; transform-box: fill-box; transform-origin: 50% 50%;
+                    animation: spRuleIn 760ms cubic-bezier(.2,.7,.3,1) calc(var(--sp-lock) + 180ms) forwards; }
+  .sp-lock-kind   { opacity: 0; animation: spRise 700ms cubic-bezier(.2,.7,.3,1) calc(var(--sp-lock) + 320ms) forwards; }
+  .sp-lock-studio { opacity: 0; animation: spStudioIn 800ms ease-out calc(var(--sp-lock) + 520ms) forwards; }
+  @keyframes spRise { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: none; } }
+  @keyframes spRuleIn { from { opacity: 0; transform: scaleX(0); } to { opacity: 1; transform: none; } }
+  @keyframes spStudioIn { to { opacity: .5; } }
+
+  .sp-ember { animation: spEmber 5.5s ease-in-out calc(var(--sp-lock) + 600ms) infinite; }
+  @keyframes spEmber { 0%, 100% { opacity: .5; } 50% { opacity: .85; } }
+
+  /* Reduced motion: show the finished mark and lockup, skip the choreography.
+     The climb front has to be parked at its END position or the mountain is
+     left sitting under the dim half of the mask. */
   @media (prefers-reduced-motion: reduce) {
-    .splash-dot { animation: none; }
+    .sp-climb-rect { animation: none; transform: translateY(-60px); }
+    .sp-band-rect, .sp-pulse { animation: none; opacity: 0; }
+    .sp-frame, .sp-lock-app, .sp-lock-rule, .sp-lock-kind { animation: none; opacity: 1; }
+    .sp-lock-studio { animation: none; opacity: .5; }
+    .sp-ember { animation: none; opacity: .68; }
   }
 </style>
 </head>
 <body>
 
 <div id="splashScreen">
-  <div class="splash-dot"></div>
-  <div class="splash-word">Workout</div>
+<svg class="sp-mark" viewBox="0 0 1000 2120" preserveAspectRatio="xMidYMid meet"
+     xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <filter id="spRoughLine" x="-12%" y="-12%" width="124%" height="124%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.03 0.018" numOctaves="2" seed="11" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="6" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <filter id="spBleed" x="-30%" y="-30%" width="160%" height="160%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.006" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="44" xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feGaussianBlur in="d" stdDeviation="30"/>
+    </filter>
+    <filter id="spWick" x="-30%" y="-20%" width="160%" height="140%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.010 0.024" numOctaves="4" seed="23" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="130" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+
+    <!-- peak-v5.png is near-black navy ink whose DENSITY lives in the alpha
+         channel — built to multiply onto white paper, so on black it reads as
+         nothing at all. Throw the painting's pixels away and keep only its
+         alpha: this copies A into RGB, giving a luminance map where loaded
+         brush = white, bare paper = black, which can then mask any fill.
+         Density → light inverts what the painting was made for, so the gamma
+         pushes midtones down; without it the mountain is one lit slab. -->
+    <filter id="spAlphaLum" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB">
+      <feColorMatrix type="matrix" values="0 0 0 1 0  0 0 0 1 0  0 0 0 1 0  0 0 0 0 1"/>
+      <feComponentTransfer>
+        <feFuncR type="gamma" exponent="1.45"/>
+        <feFuncG type="gamma" exponent="1.45"/>
+        <feFuncB type="gamma" exponent="1.45"/>
+      </feComponentTransfer>
+    </filter>
+    <mask id="spInkMask" maskUnits="userSpaceOnUse" x="-200" y="0" width="1400" height="1400">
+      <image href="launch/peak-v5.png" x="-102" y="57" width="1075" height="1075"
+             preserveAspectRatio="xMidYMid meet" filter="url(#spAlphaLum)"/>
+    </mask>
+
+    <!-- ORDER MATTERS: SVG applies `filter` BEFORE `mask`, so both on one
+         element blurs the un-masked rect (a no-op on flat colour) and then cuts
+         it sharply — no glow, just flat colour laid over the mass, which tints
+         the white ink instead of lighting it. Every bloom sits on a WRAPPER. -->
+    <filter id="spBloomF" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur stdDeviation="16"/>
+    </filter>
+    <filter id="spBloomWide" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="48"/>
+    </filter>
+    <!-- glow OUTSIDE the silhouette only: blur, then subtract the shape back
+         out, so the pulse never washes across the ink itself -->
+    <filter id="spHaloRing" x="-45%" y="-45%" width="190%" height="190%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="42" result="b"/>
+      <feComposite in="b" in2="SourceGraphic" operator="out"/>
+    </filter>
+
+    <linearGradient id="spInkTone" gradientUnits="userSpaceOnUse" x1="120" y1="150" x2="820" y2="1040">
+      <stop offset="0"   stop-color="#ffffff"/>
+      <stop offset=".18" stop-color="#f6f8ee"/>
+      <stop offset=".42" stop-color="#e2e8d2"/>
+      <stop offset=".72" stop-color="#a8b39d"/>
+      <stop offset="1"   stop-color="#63736b"/>
+    </linearGradient>
+    <linearGradient id="spHaloTone" gradientUnits="userSpaceOnUse" x1="120" y1="150" x2="820" y2="1040">
+      <stop offset="0"   stop-color="#eaff8a"/>
+      <stop offset=".22" stop-color="#d4ff3a"/>
+      <stop offset=".6"  stop-color="#9bc52a"/>
+      <stop offset="1"   stop-color="#3f8a58"/>
+    </linearGradient>
+
+    <!-- the painting carries warm flecks at the summit; hue-shifted onto the
+         accent so the one saturated thing on screen is the app's own colour -->
+    <filter id="spEmberFx" color-interpolation-filters="sRGB" x="-10%" y="-10%" width="120%" height="120%">
+      <feColorMatrix type="saturate" values="2.4"/>
+      <feColorMatrix type="hueRotate" values="38"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.9"/><feFuncG type="linear" slope="1.45"/><feFuncB type="linear" slope="0.35"/>
+      </feComponentTransfer>
+    </filter>
+    <filter id="spEmberBloomFx" color-interpolation-filters="sRGB" x="-40%" y="-40%" width="180%" height="180%">
+      <feColorMatrix type="saturate" values="3"/>
+      <feColorMatrix type="hueRotate" values="38"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="1"/><feFuncG type="linear" slope="1.6"/><feFuncB type="linear" slope="0.15"/>
+      </feComponentTransfer>
+      <feGaussianBlur stdDeviation="17"/>
+    </filter>
+
+    <!-- the flank still carries ink where it meets x=0, so the canvas edge would
+         cut it flat; at this scale the right tail lands ~10 units off the edge,
+         so it gets a roll-off too -->
+    <linearGradient id="spEdgeFadeGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="1000" y2="0">
+      <stop offset="0"    stop-color="#000000"/>
+      <stop offset=".030" stop-color="#2e2e2e"/>
+      <stop offset=".060" stop-color="#8f8f8f"/>
+      <stop offset=".085" stop-color="#e0e0e0"/>
+      <stop offset=".100" stop-color="#ffffff"/>
+      <stop offset=".950" stop-color="#ffffff"/>
+      <stop offset=".985" stop-color="#b4b4b4"/>
+      <stop offset="1"    stop-color="#4a4a4a"/>
+    </linearGradient>
+    <mask id="spEdgeFade" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="2120">
+      <rect x="0" y="0" width="1000" height="2120" fill="url(#spEdgeFadeGrad)"/>
+    </mask>
+
+    <!-- the square is cut away by the painting's own density: solid mass hides
+         the line, mist lets it surface. This mask reads the ORIGINAL asset —
+         dark ink = 0 = hidden — so it survived the palette flip untouched. -->
+    <mask id="spFrameOcclude" maskUnits="userSpaceOnUse" x="-200" y="0" width="1400" height="1400">
+      <rect x="-200" y="0" width="1400" height="1400" fill="#fff"/>
+      <image href="launch/frame-occlude.png" x="-102" y="57" width="1075" height="1075"
+             preserveAspectRatio="xMidYMid meet"/>
+    </mask>
+
+    <!-- a flat grey floor under a rising gradient: above the front the mask is
+         dim (the mountain is present but cold), below it 1.0 (full ink). One
+         painting, one mask — a second full copy underneath would double the
+         render cost on a phone for the same picture.
+         The floor value is the whole legibility of the climb. At #787878 the
+         cold state sits too close to the lit state and the only thing that
+         reads is the lime band travelling; the ink never visibly comes up.
+         #4a4a4a keeps the summit readable so the mountain is clearly THERE and
+         waiting, while leaving the front room to mean something. -->
+    <linearGradient id="spClimbGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="240">
+      <stop offset="0" stop-color="#4a4a4a"/>
+      <stop offset="1" stop-color="#ffffff"/>
+    </linearGradient>
+    <mask id="spMClimb" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="2120">
+      <rect x="0" y="0" width="1000" height="2120" fill="#4a4a4a"/>
+      <rect class="sp-climb-rect" x="-320" y="0" width="1640" height="3400"
+            fill="url(#spClimbGrad)" filter="url(#spWick)"/>
+    </mask>
+
+    <linearGradient id="spBandGrad" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="0" y2="300">
+      <stop offset="0"   stop-color="#000"/>
+      <stop offset=".42" stop-color="#ffffff"/>
+      <stop offset=".62" stop-color="#8a8a8a"/>
+      <stop offset="1"   stop-color="#000"/>
+    </linearGradient>
+    <mask id="spMBand" maskUnits="userSpaceOnUse" x="0" y="0" width="1000" height="2120">
+      <rect class="sp-band-rect" x="-320" y="0" width="1640" height="300"
+            fill="url(#spBandGrad)" filter="url(#spWick)"/>
+    </mask>
+
+    <!-- a struck line, not a drawn one: it burns out at both ends -->
+    <linearGradient id="spNeonRule" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0"   stop-color="#d4ff3a" stop-opacity="0"/>
+      <stop offset=".22" stop-color="#9bc52a" stop-opacity=".55"/>
+      <stop offset=".5"  stop-color="#d4ff3a" stop-opacity="1"/>
+      <stop offset=".78" stop-color="#9bc52a" stop-opacity=".55"/>
+      <stop offset="1"   stop-color="#d4ff3a" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1000" height="2120" fill="#0a0a0a"/>
+
+  <!-- spEdgeFade is applied OUTSIDE the placement transform so it stays locked
+       to the canvas edge rather than scaling with the painting -->
+  <g mask="url(#spEdgeFade)" style="isolation:isolate">
+
+    <g class="sp-frame">
+      <g transform="translate(-28.04,57.43) scale(1.0977)">
+        <g mask="url(#spFrameOcclude)" filter="url(#spRoughLine)" fill="none"
+           stroke="#d4ff3a" stroke-width="2.8" stroke-linecap="round" opacity=".17">
+          <path d="M130,262 C320,257 560,266 870,260"/>
+          <path d="M868,260 C873,480 866,760 870,1000"/>
+          <path d="M870,999 C640,1004 360,995 130,1000"/>
+          <path d="M132,1000 C127,760 135,470 130,260"/>
+        </g>
+      </g>
+    </g>
+
+    <g mask="url(#spMClimb)">
+      <g transform="translate(-28.04,57.43) scale(1.0977)">
+        <!-- kept well down: this sits BEHIND a white mass, so anywhere the ink
+             runs thin it surfaces as a green stain on the rock -->
+        <g style="mix-blend-mode:screen">
+          <path filter="url(#spBleed)" fill="#24451b" opacity=".26"
+                d="M318,586 C356,452 424,318 486,222 C548,318 616,452 664,586 C580,626 400,626 318,586 Z"/>
+        </g>
+        <g filter="url(#spBloomWide)" opacity=".26" style="mix-blend-mode:screen">
+          <g mask="url(#spInkMask)"><rect x="-200" y="0" width="1400" height="1400" fill="url(#spHaloTone)"/></g>
+        </g>
+        <g filter="url(#spBloomF)" opacity=".14" style="mix-blend-mode:screen">
+          <g mask="url(#spInkMask)"><rect x="-200" y="0" width="1400" height="1400" fill="url(#spHaloTone)"/></g>
+        </g>
+        <g mask="url(#spInkMask)" style="mix-blend-mode:screen">
+          <rect x="-200" y="0" width="1400" height="1400" fill="url(#spInkTone)"/>
+        </g>
+        <g class="sp-ember" style="mix-blend-mode:screen">
+          <image href="launch/peak-v5.png" x="-102" y="57" width="1075" height="1075"
+                 preserveAspectRatio="xMidYMid meet" filter="url(#spEmberBloomFx)"/>
+        </g>
+        <image href="launch/peak-v5.png" x="-102" y="57" width="1075" height="1075"
+               preserveAspectRatio="xMidYMid meet" filter="url(#spEmberFx)" opacity=".4"
+               style="mix-blend-mode:screen"/>
+      </g>
+    </g>
+
+    <!-- the accent riding the leading edge of the climb -->
+    <g mask="url(#spMBand)">
+      <g transform="translate(-28.04,57.43) scale(1.0977)">
+        <g filter="url(#spBloomF)" opacity=".75" style="mix-blend-mode:screen">
+          <g mask="url(#spInkMask)"><rect x="-200" y="0" width="1400" height="1400" fill="#d4ff3a"/></g>
+        </g>
+        <g mask="url(#spInkMask)" opacity=".5" style="mix-blend-mode:screen">
+          <rect x="-200" y="0" width="1400" height="1400" fill="#eaff8a"/>
+        </g>
+      </g>
+    </g>
+
+    <!-- the answering pulse, fired with the lockup -->
+    <g class="sp-pulse">
+      <g transform="translate(-28.04,57.43) scale(1.0977)">
+        <g filter="url(#spHaloRing)" opacity=".85" style="mix-blend-mode:screen">
+          <g mask="url(#spInkMask)"><rect x="-200" y="0" width="1400" height="1400" fill="#d4ff3a"/></g>
+        </g>
+        <g mask="url(#spInkMask)" opacity=".07" style="mix-blend-mode:screen">
+          <rect x="-200" y="0" width="1400" height="1400" fill="#eaff8a"/>
+        </g>
+      </g>
+    </g>
+  </g>
+
+  <!-- SVG letter-spacing trails the final glyph, so centred text needs
+       x = 500 + spacing/2. The serif is the brand; WORKOUT is set in the app's
+       own JetBrains Mono, which is what ties this screen to the product. -->
+  <g class="sp-lock-app">
+    <text x="514" y="1522" text-anchor="middle"
+          font-family="'Cormorant Garamond', Georgia, serif" font-size="164"
+          font-weight="300" letter-spacing="28" fill="#f5f5f5">ASCENT</text>
+  </g>
+  <rect class="sp-lock-rule" x="372" y="1586" width="256" height="1.5" fill="url(#spNeonRule)"/>
+  <g class="sp-lock-kind">
+    <text x="510" y="1652" text-anchor="middle"
+          font-family="'JetBrains Mono', monospace" font-size="27"
+          font-weight="300" letter-spacing="19" fill="#9bc52a">WORKOUT</text>
+  </g>
+  <g class="sp-lock-studio">
+    <text x="506" y="1988" text-anchor="middle"
+          font-family="'JetBrains Mono', monospace" font-size="13"
+          font-weight="300" letter-spacing="12" fill="#7d7d7d">WILD PHERSDAY</text>
+  </g>
+</svg>
 </div>
 
 <div class="app">
@@ -3986,6 +4333,9 @@ function renderHomeState() {
 
 // ===== TABS =====
 const TAB_ORDER = ['home', 'workout', 'progress'];
+// Which tab we're currently on, so switchTab can tell "entered Progress" from
+// "re-rendered Progress". The heatmap tile drop keys off this.
+let currentTab = null;
 
 function switchTab(tab) {
   const tabIndex = TAB_ORDER.indexOf(tab);
@@ -4004,10 +4354,13 @@ function switchTab(tab) {
       updateSessionTimer();
     }
     if (tab === 'progress') {
+      // Drop the tiles only when arriving on Progress from somewhere else.
+      const entering = currentTab !== 'progress';
       renderProgress();
-      renderHeatmap();
+      renderHeatmap(entering);
       renderTrends();
     }
+    currentTab = tab;
     window.scrollTo({ top: 0, behavior: 'instant' });
   };
   if (document.startViewTransition) {
@@ -4231,7 +4584,13 @@ function renderProgress() {
       detailHtml = `
         <div class="session-exercises">${exDetails}</div>
         <div class="session-notes-edit">
-          <div class="session-notes-edit-lbl">✎ Tap to edit notes</div>
+          <div class="session-notes-edit-lbl">✎ Tap to edit</div>
+          <div class="session-notes-row">
+            <div class="session-notes-lbl">Date</div>
+            <input type="date" class="session-notes-input session-date-input"
+                   value="${localDateStr(new Date(s.date))}" max="${localDateStr()}"
+                   onchange="updateSessionDate(${s.id}, this.value)">
+          </div>
           <div class="session-notes-row">
             <div class="session-notes-lbl">Felt</div>
             <input class="session-notes-input" value="${feltVal}"
@@ -4310,6 +4669,51 @@ function undoDeleteSession() {
   renderHeatmap();
   renderTrends();
   showToast('Session restored');
+}
+
+// Re-date a logged session. The gap this fills: you could always edit a past
+// log's notes, but not the day it landed on, so a session logged late (or on
+// the wrong day) was stuck there and skewed the heatmap and the streak.
+//
+// Two things this has to get right:
+//
+// 1. NOON, not midnight. `new Date('2026-08-05')` parses as UTC midnight, which
+//    in Australia is mid-morning the same day — but push the clocks the other
+//    way and it lands on the 4th. Stamping noon local puts the timestamp far
+//    enough from either boundary that no timezone or DST shift can move the
+//    calendar day. This mirrors how a session is stamped at log time.
+//
+// 2. RE-SORT. state.history is newest-first only because logging unshifts onto
+//    the front — nothing ever sorts it. Re-dating breaks that invariant, and
+//    the breakage is silent: renderHeatmap reverses the array so "newest wins"
+//    a day's colour, and buildExerciseTrends reverses it to plot oldest→newest.
+//    Out of order, a sparkline plots your progression scrambled.
+function updateSessionDate(sessionId, value) {
+  const session = state.history.find(s => s.id === sessionId);
+  if (!session || !value) return;
+
+  const next = new Date(value + 'T12:00:00');
+  if (isNaN(next)) return;
+
+  // `max` on the input isn't enforced on every platform, and a future-dated
+  // session would render into the heatmap's greyed-out future cells.
+  const todayNoon = new Date(localDateStr() + 'T12:00:00');
+  if (next > todayNoon) {
+    showToast("Can't date a session in the future");
+    renderProgress();
+    return;
+  }
+
+  const before = session.date;
+  session.date = next.toISOString();
+  if (before === session.date) return;
+
+  state.history.sort((a, b) => new Date(b.date) - new Date(a.date));
+  saveState();
+  renderProgress();
+  renderHeatmap();
+  renderTrends();
+  showToast(`Moved to ${next.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' })}`);
 }
 
 function updateSessionNote(sessionId, field, value) {
@@ -4633,7 +5037,9 @@ const CATEGORY_COLOUR = {
 };
 
 // ===== HEATMAP =====
-function renderHeatmap() {
+// `animate` drops the tiles in. Only switchTab passes true, and only when
+// Progress is actually being entered — see the note on `.hm-anim` in the CSS.
+function renderHeatmap(animate = false) {
   const grid = document.getElementById('heatmapGrid');
   if (!grid) return;
   const today = new Date();
@@ -4666,10 +5072,16 @@ function renderHeatmap() {
     if (isFuture)  cls += ' empty';
     if (isTrained) cls += ' trained';
     if (isToday)   cls += ' today';
-    const style = isTrained ? ` style="background:${colour};border-color:${colour}"` : '';
-    html += `<div class="${cls}"${style} title="${d.toDateString()}">${isTrained ? '✓' : (isFuture ? '' : d.getDate())}</div>`;
+    // --i is the tile-drop stagger index, consumed by `.hm-anim .heatmap-cell`
+    const tint = isTrained ? `background:${colour};border-color:${colour};` : '';
+    html += `<div class="${cls}" style="${tint}--i:${i}" title="${d.toDateString()}">${isTrained ? '✓' : (isFuture ? '' : d.getDate())}</div>`;
   }
   html += '</div>';
+  // The class has to land on the container BEFORE the cells are inserted, so
+  // the fresh nodes pick up the descendant rule on their first style pass.
+  // Toggling (not just adding) also clears it on the re-renders that must NOT
+  // animate — expand a row, delete a session, undo a delete.
+  grid.classList.toggle('hm-anim', !!animate);
   grid.innerHTML = html;
 }
 
@@ -4973,13 +5385,23 @@ COOLDOWN_PUSH.forEach(ex => ensureExerciseState(ex.id));
 saveState();
 
 // ===== SPLASH =====
-// Everything above has now run synchronously, so Home is actually rendered
-// and ready — just enforce a small minimum hold so the splash doesn't
-// flicker away instantly on a fast reload, then fade it out.
+// Everything above has now run synchronously, so Home is already rendered
+// behind the splash — the hold is purely for the brand sequence, not for
+// loading. MIN_MS tracks the CSS vars on #splashScreen: the front reaches the
+// foot at ~880ms and the summit at ~2670ms, the climb settles at 3200ms, the
+// lockup lands at 3300ms and settles by ~4000ms, the studio line by ~4620ms,
+// and the halo pulse has decayed by ~4400ms. The hold then sits on the finished
+// lockup for a beat before the fade. Anyone who prefers reduced motion sees the
+// finished mark immediately, so cut their hold.
+//
+// This is a deliberate ~5s brand moment, paid on every cold open. To retime it,
+// move --sp-climb-dur and --sp-lock together and bring MIN_MS with them —
+// cutting MIN_MS alone clips the pulse mid-decay and the studio line mid-fade.
 (function hideSplash() {
   const el = document.getElementById('splashScreen');
   if (!el) return;
-  const MIN_MS = 450, FADE_MS = 350;
+  const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const MIN_MS = reduced ? 1000 : 5000, FADE_MS = 500;
   const wait = Math.max(0, MIN_MS - performance.now());
   setTimeout(() => {
     el.classList.add('hide');

@@ -1,0 +1,5 @@
+.DS_Store
+
+# Local tooling state — browse logs and cached capability probes. Machine-local
+# and partly private-mode (0600); nothing here belongs in the deployed app.
+.gstack/
