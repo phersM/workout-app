@@ -1924,8 +1924,13 @@
      Timing lives in the three vars below; the hold in the SPLASH block at the
      bottom of the script is derived from them. Removed from the DOM there. */
   #splashScreen {
-    --sp-climb-delay: 400ms;
-    --sp-climb-dur: 2800ms;
+    /* The climb waits for the mountain to arrive. It used to start at 400ms,
+       while the cold layer was painted at full strength from the very first
+       frame — so the screen opened ON a picture and the light just traced over
+       something already sitting there. The mountain now fades up out of the
+       black first, and the front only sets off once it has. */
+    --sp-climb-delay: 1000ms;
+    --sp-climb-dur: 2200ms;
     --sp-lock: 3300ms;
     position: fixed; inset: 0; z-index: 10000;
     background: #0a0a0a;
@@ -1968,8 +1973,16 @@
   .sp-pulse { opacity: 0; animation: spPulseOnce 1100ms cubic-bezier(.2,.7,.3,1) var(--sp-lock) both; }
   @keyframes spPulseOnce { 0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: 0; } }
 
-  .sp-frame { opacity: 0; animation: spFadeIn 1100ms ease-out 260ms forwards; }
+  .sp-frame { opacity: 0; animation: spFadeIn 1100ms ease-out 380ms forwards; }
   @keyframes spFadeIn { to { opacity: 1; } }
+
+  /* The cold mountain arrives out of the black rather than being there when the
+     screen opens. The target opacity lives in the keyframe, NOT as an opacity
+     attribute on the <image> — a CSS opacity beats a presentation attribute on
+     the same element, so the attribute would be ignored and the layer would
+     settle at full strength. */
+  .sp-cold { opacity: 0; animation: spColdIn 900ms ease-out 200ms forwards; }
+  @keyframes spColdIn { to { opacity: .3; } }
 
   .sp-lock-app    { opacity: 0; animation: spRise 700ms cubic-bezier(.2,.7,.3,1) var(--sp-lock) forwards; }
   .sp-lock-rule   { opacity: 0; transform-box: fill-box; transform-origin: 50% 50%;
@@ -1993,6 +2006,9 @@
     .sp-band-rect, .sp-pulse { animation: none; opacity: 0; }
     .sp-frame, .sp-lock-app, .sp-lock-rule, .sp-lock-kind { animation: none; opacity: 1; }
     .sp-lock-studio { animation: none; opacity: .5; }
+    /* the front is parked past the summit, so the lit layer covers everything;
+       the cold layer just needs to not be invisible underneath it */
+    .sp-cold { animation: none; opacity: .3; }
   }
 </style>
 </head>
@@ -2080,7 +2096,8 @@
     </g>
 
     <!-- the mountain, cold: present but unlit, waiting -->
-    <image href="launch/splash-mtn.webp" x="-140" y="120" width="1180" height="1180" opacity=".3"/>
+    <image class="sp-cold" href="launch/splash-mtn.webp"
+           x="-140" y="120" width="1180" height="1180"/>
 
     <!-- the same image at full strength, revealed from below by the climb -->
     <g mask="url(#spFront)">
@@ -5268,11 +5285,12 @@ saveState();
 // ===== SPLASH =====
 // Everything above has now run synchronously, so Home is already rendered
 // behind the splash — the hold is purely for the brand sequence, not for
-// loading. MIN_MS tracks the CSS vars on #splashScreen: the front reaches the
-// foot at ~880ms and the summit at ~2670ms, the climb settles at 3200ms, the
-// lockup lands at 3300ms and settles by ~4000ms, the studio line by ~4620ms,
-// and the halo pulse has decayed by ~4400ms. The hold then sits on the finished
-// lockup for a beat before the fade. Anyone who prefers reduced motion sees the
+// loading. MIN_MS tracks the CSS vars on #splashScreen: the mountain fades up
+// out of the black by ~1100ms, the front sets off at 1000ms and reaches the foot
+// at ~1350ms and the summit at ~2780ms, the climb settles at 3200ms, the lockup
+// lands at 3300ms and settles by ~4000ms, the studio line by ~4620ms, and the
+// halo pulse has decayed by ~4400ms. The hold then sits on the finished lockup
+// for a beat before the fade. Anyone who prefers reduced motion sees the
 // finished mark immediately, so cut their hold.
 //
 // This is a deliberate ~5s brand moment, paid on every cold open. To retime it,
